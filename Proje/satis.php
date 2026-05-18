@@ -284,6 +284,26 @@ $page_title = 'Hızlı Satış Ekranı (POS)';
         }
     }
 
+    // Miktar Değiştirme Fonksiyonu (+ / - butonları ve doğrudan input girişi için)
+    function miktarDegistir(productId, yeniMiktar) {
+        yeniMiktar = parseInt(yeniMiktar);
+        if (isNaN(yeniMiktar) || yeniMiktar < 1) {
+            removeSaleItem(productId);
+            return;
+        }
+
+        let existing = salesCart.find(item => item.id === productId);
+        if (existing) {
+            if (yeniMiktar > existing.stok) {
+                Swal.fire('Stok Yetersiz!', `Bu üründen stokta en fazla ${existing.stok} adet var.`, 'warning');
+                existing.miktar = existing.stok;
+            } else {
+                existing.miktar = yeniMiktar;
+            }
+            updateSalesCartUI();
+        }
+    }
+
     // 4. Sepet Arayüzünü Güncelleme
     function updateSalesCartUI() {
         let container = document.getElementById('salesCartContainer');
@@ -309,12 +329,17 @@ $page_title = 'Hızlı Satış Ekranı (POS)';
 
                 itemsHTML += `
                 <div class="d-flex justify-content-between align-items-center bg-dark p-3 rounded mb-2 border border-secondary shadow-sm">
-                    <div>
+                    <div class="flex-grow-1 me-2">
                         <div class="text-white fw-bold fs-6">${item.ad}</div>
-                        <small class="text-muted">₺${item.fiyat.toFixed(2)} x ${item.miktar} Adet</small>
+                        <small class="text-muted">₺${item.fiyat.toFixed(2)} Birim Fiyat</small>
+                    </div>
+                    <div class="d-flex align-items-center me-3">
+                        <button class="btn btn-sm btn-outline-secondary px-2 py-1 text-white" onclick="miktarDegistir(${item.id}, ${item.miktar - 1})"><i class="fa-solid fa-minus"></i></button>
+                        <input type="number" class="form-control form-control-sm text-center mx-1 bg-light fw-bold" style="width: 65px;" value="${item.miktar}" min="1" max="${item.stok}" onchange="miktarDegistir(${item.id}, this.value)">
+                        <button class="btn btn-sm btn-outline-secondary px-2 py-1 text-white" onclick="miktarDegistir(${item.id}, ${item.miktar + 1})"><i class="fa-solid fa-plus"></i></button>
                     </div>
                     <div class="d-flex align-items-center">
-                        <h6 class="text-success mb-0 me-3 fw-bold">₺${itemTotal.toFixed(2)}</h6>
+                        <h6 class="text-success mb-0 me-3 fw-bold" style="width: 80px; text-align: right;">₺${itemTotal.toFixed(2)}</h6>
                         <button class="btn btn-sm btn-danger rounded-circle" onclick="removeSaleItem(${item.id})"><i class="fa-solid fa-xmark"></i></button>
                     </div>
                 </div>`;
