@@ -151,7 +151,7 @@ $page_title = 'Hızlı Satış Ekranı (POS)';
             </div>
 
             <!-- Ürün Grid Alanı (Dikey Scroll) -->
-            <div id="urun_listesi" class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-3 overflow-y-auto overflow-x-hidden pe-2 pb-3" style="max-height: 55vh;">
+            <div id="urun_listesi" class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-3 overflow-y-auto overflow-x-hidden pe-2 pb-3" style="height: 55vh; min-height: 380px;">
                 <div class="col-12 py-4 text-center text-muted">Ürünler yükleniyor...</div>
             </div>
         </div>
@@ -167,12 +167,13 @@ $page_title = 'Hızlı Satış Ekranı (POS)';
                 </div>
 
                 <!-- Sepet İçi (JS ile Liste Buraya Gelecek) -->
-                <div id="salesCartContainer" class="flex-grow-1 d-flex flex-column mb-4 overflow-y-auto pe-2" style="max-height: 40vh;">
+                <div id="salesCartContainer" class="flex-grow-1 d-flex flex-column mb-4 overflow-y-auto pe-2" style="height: 40vh; min-height: 280px;">
                     <div id="emptyCartMessage" class="d-flex flex-column align-items-center justify-content-center h-100 p-4" style="border: 2px dashed #334155; border-radius: 12px; background-color: rgba(30, 41, 59, 0.5);">
                         <i class="fa-solid fa-cart-arrow-down fa-3x mb-3 text-secondary"></i>
                         <h6 class="text-white mb-1">Sepet boş</h6>
                         <small class="text-muted">Soldaki katalog/listeden ürün ekleyin</small>
                     </div>
+                    <div id="salesCartItems"></div>
                 </div>
 
                 <!-- Sepet Alt Özet ve Tamamlama Alanı -->
@@ -306,7 +307,7 @@ $page_title = 'Hızlı Satış Ekranı (POS)';
 
     // 4. Sepet Arayüzünü Güncelleme
     function updateSalesCartUI() {
-        let container = document.getElementById('salesCartContainer');
+        let itemsContainer = document.getElementById('salesCartItems');
         let emptyMsg = document.getElementById('emptyCartMessage');
         let uniqueCount = document.getElementById('salesUniqueItemsCount');
         let totalCount = document.getElementById('salesTotalItemsCount');
@@ -319,6 +320,7 @@ $page_title = 'Hızlı Satış Ekranı (POS)';
 
         if (salesCart.length === 0) {
             emptyMsg.style.display = 'flex';
+            itemsContainer.innerHTML = '';
         } else {
             emptyMsg.style.display = 'none';
             
@@ -344,13 +346,8 @@ $page_title = 'Hızlı Satış Ekranı (POS)';
                     </div>
                 </div>`;
             });
-        }
 
-        if (salesCart.length > 0) {
-            container.innerHTML = itemsHTML;
-        } else {
-            container.innerHTML = '';
-            container.appendChild(emptyMsg);
+            itemsContainer.innerHTML = itemsHTML;
         }
 
         uniqueCount.innerText = salesCart.length;
