@@ -109,9 +109,8 @@ function urunEklePenceresi() {
                     <input type="number" id="ekleSatis" class="form-control" step="0.01" min="0" placeholder="0.00" required>
                 </div>
             </div>
-            <div class="text-start mb-3">
-                <label class="fw-bold form-label">Başlangıç Stok Miktarı:</label>
-                <input type="number" id="ekleStok" class="form-control" min="0" value="10" required>
+            <div class="alert alert-info fs-7 text-start mb-0">
+                <i class="fa-solid fa-info-circle me-1"></i> Yeni ürünlerin stok girişi <b>Mal Alış (Tedarik)</b> ekranından yapılmaktadır. Başlangıç stoku 0 olarak kaydedilecektir.
             </div>
         `,
         icon: 'info',
@@ -126,9 +125,9 @@ function urunEklePenceresi() {
             let kategori_id = document.getElementById('ekleKategori').value;
             let alis_fiyati = document.getElementById('ekleAlis').value;
             let satis_fiyati = document.getElementById('ekleSatis').value;
-            let stok_miktari = document.getElementById('ekleStok').value;
+            let stok_miktari = 0; // İlk kayıtta stok sormuyoruz, 0 atıyoruz
 
-            if (!barkod || !ad || !alis_fiyati || !satis_fiyati || !stok_miktari) {
+            if (!barkod || !ad || !alis_fiyati || !satis_fiyati) {
                 Swal.showValidationMessage('Lütfen tüm alanları doldurun.');
             }
             return { barkod, ad, kategori_id, alis_fiyati, satis_fiyati, stok_miktari };

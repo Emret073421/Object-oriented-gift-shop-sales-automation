@@ -1,129 +1,128 @@
 <?php 
 $page_title = 'Mal Alış (Tedarik) İşlemleri';
-// header is now included in index.php
 ?>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-<div class="card card-custom bg-white mb-4">
+<!-- ÜST BİLGİ VE YENİ ALIŞ BUTONU -->
+<div class="card card-custom bg-white border-0 shadow-sm mb-4">
     <div class="card-body text-center p-5">
-        <i class="fa-solid fa-truck-ramp-box fa-4x text-muted mb-3"></i>
-        <h4 class="mb-3">Toptancı / Tedarikçi Mal Girişi</h4>
-        <p class="text-muted mb-4">Dükkanınıza yeni mal/stok girişi yapmak için bu modülü kullanabilirsiniz.</p>
-        <button class="btn btn-primary btn-lg" onclick="openCartModal()"><i class="fa-solid fa-plus me-2"></i>Yeni Alış Fişi Oluştur</button>
+        <i class="fa-solid fa-truck-ramp-box fa-4x text-primary mb-3"></i>
+        <h4 class="mb-2 fw-bold text-dark">Toptancı / Tedarikçi Mal Girişi</h4>
+        <p class="text-muted mb-4">Dükkanınıza yeni mal/stok girişi yapmak ve resmi alış fişi düzenlemek için bu modülü kullanabilirsiniz.</p>
+        <button class="btn btn-primary btn-lg px-5 fw-bold shadow-sm" onclick="openCartModal()">
+            <i class="fa-solid fa-plus me-2"></i> Yeni Alış Fişi Oluştur
+        </button>
     </div>
 </div>
 
-<div class="card card-custom bg-white">
-    <div class="card-header bg-white py-3 d-flex flex-wrap justify-content-between align-items-center">
-        <h6 class="mb-0">Son Alış (Tedarik) Hareketleri</h6>
+<!-- GEÇMİŞ ALIŞ HAREKETLERİ LİSTESİ -->
+<div class="card card-custom bg-white border-0 shadow-sm">
+    <div class="card-header bg-white py-3 border-0 d-flex flex-wrap justify-content-between align-items-center">
+        <h5 class="mb-0 fw-bold text-dark"><i class="fa-solid fa-clock-rotate-left text-success me-2"></i> Son Alış (Tedarik) Hareketleri</h5>
         <!-- Tarih Filtresi Alanı -->
         <div class="d-flex align-items-center gap-2 mt-2 mt-md-0">
             <label for="startDate" class="form-label mb-0 small text-muted d-none d-md-block">Tarih Aralığı:</label>
-            <input type="date" id="startDate" class="form-control form-control-sm" style="max-width: 150px;">
+            <input type="date" id="startDate" class="form-control form-control-sm py-1 shadow-sm" style="max-width: 140px;">
             <span class="text-muted">-</span>
-            <input type="date" id="endDate" class="form-control form-control-sm" style="max-width: 150px;">
-            <button class="btn btn-sm btn-outline-primary" onclick="filterByDate()">
-                <i class="fa-solid fa-filter"></i> Filtrele
+            <input type="date" id="endDate" class="form-control form-control-sm py-1 shadow-sm" style="max-width: 140px;">
+            <button class="btn btn-sm btn-primary px-3 shadow-sm" onclick="alisHareketleriniGetir()">
+                <i class="fa-solid fa-filter me-1"></i> Filtrele
+            </button>
+            <button class="btn btn-sm btn-outline-secondary" onclick="tarihFiltresiniTemizle()" title="Filtreyi Temizle">
+                <i class="fa-solid fa-rotate-right"></i>
             </button>
         </div>
     </div>
-    <div class="card-body p-0">
-        <div class="table-responsive" style="max-height: 60vh; overflow-y: auto;">
-            <table class="table table-hover align-middle mb-0">
-                <thead class="table-light">
-                    <tr>
-                        <th class="ps-4">İşlem Kodu</th>
-                        <th>Tarih</th>
-                        <th>Tedarikçi/Not</th>
-                        <th>Alınan Ürün</th>
-                        <th>Miktar</th>
-                        <th>Toplam Tutar</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td class="ps-4 text-muted">#AL-100</td>
-                        <td>Bugün, 10:00</td>
-                        <td>Kütahya Çini Toptan</td>
-                        <td>El Yapımı Çini Kase</td>
-                        <td><span class="badge bg-primary">10 Adet</span></td>
-                        <td class="fw-bold">₺1,200.00</td>
-                    </tr>
-                </tbody>
-            </table>
+    <div class="card-body p-4">
+        <div id="alisHareketleriListesi" style="min-height: 300px;">
+            <div class="text-center py-5 text-muted">
+                <div class="spinner-border text-primary" role="status"></div>
+                <p class="mt-2">Alış hareketleri yükleniyor...</p>
+            </div>
         </div>
     </div>
 </div>
 
-<!-- Alış Sepeti Modalı (JS kodlaması için iskelet) -->
+<!-- ALIŞ SEPETİ MODALI -->
 <div class="modal fade" id="cartModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-xl modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title"><i class="fa-solid fa-cart-flatbed text-primary me-2"></i>Yeni Mal Alış Fişi (Tedarik Sepeti)</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    <div class="modal-content border-0 shadow-lg">
+      <div class="modal-header bg-primary text-white border-0 py-3">
+        <h5 class="modal-title fw-bold"><i class="fa-solid fa-cart-flatbed me-2"></i> Yeni Mal Alış Fişi (Tedarik Sepeti)</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      <div class="modal-body bg-light">
-        <div class="row">
-            <!-- Sol Taraf: Ürün Ekleme -->
-            <div class="col-md-5">
-                <div class="card border-0 shadow-sm mb-3">
-                    <div class="card-body">
-                        <h6 class="card-title fw-bold">Ürün Ekle</h6>
-                        <div class="input-group mb-3">
-                            <span class="input-group-text"><i class="fa-solid fa-barcode"></i></span>
-                            <input type="text" id="barcodeInput" class="form-control" placeholder="Barkod Okutun veya Yazın...">
-                            <button class="btn btn-primary" onclick="searchAndAddProduct()">Ekle</button>
+      <div class="modal-body bg-light p-4">
+        <div class="row g-4">
+            <!-- Sol Taraf: Ürün Ekleme & Fiş Bilgileri -->
+            <div class="col-lg-5">
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body p-4">
+                        <h6 class="card-title fw-bold text-dark mb-3"><i class="fa-solid fa-barcode text-primary me-2"></i> Ürün Ekle</h6>
+                        <div class="input-group mb-3 shadow-sm">
+                            <span class="input-group-text bg-white border-end-0"><i class="fa-solid fa-barcode text-muted"></i></span>
+                            <input type="text" id="barcodeInput" class="form-control border-start-0 ps-0" placeholder="Barkod Okutun veya Yazın..." onkeydown="if(event.key === 'Enter') searchAndAddProduct()">
+                            <button class="btn btn-primary px-4 fw-bold" onclick="searchAndAddProduct()">Ekle</button>
                         </div>
-                        <small class="text-muted">Buraya bir ürün arama/seçme listesi de yapabilirsiniz.</small>
-                        <div class="mt-3">
-                             <button class="btn btn-outline-secondary btn-sm w-100" onclick="showProductList()"><i class="fa-solid fa-list me-1"></i> Ürün Listesinden Seç</button>
-                        </div>
+                        <button class="btn btn-outline-secondary btn-sm w-100 py-2 fw-bold shadow-sm" onclick="showProductList()">
+                            <i class="fa-solid fa-list me-2"></i> Sistemdeki Ürünler Listesinden Seç
+                        </button>
                     </div>
                 </div>
                 
                 <div class="card border-0 shadow-sm">
-                    <div class="card-body">
-                        <h6 class="card-title fw-bold">Fiş / Tedarikçi Bilgileri</h6>
-                        <input type="text" id="supplierName" class="form-control mb-2" placeholder="Tedarikçi Adı (Örn: Kütahya Çini)">
-                        <input type="date" id="purchaseDate" class="form-control mb-2">
-                        <textarea id="purchaseNote" class="form-control" rows="2" placeholder="Notlar..."></textarea>
+                    <div class="card-body p-4">
+                        <h6 class="card-title fw-bold text-dark mb-3"><i class="fa-solid fa-file-invoice text-success me-2"></i> Fiş / Tedarikçi Bilgileri</h6>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-muted mb-1">Tedarikçi / Toptancı Adı</label>
+                            <input type="text" id="supplierName" class="form-control py-2 shadow-sm" placeholder="Örn: Kütahya Çini Toptan">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-muted mb-1">İşlem Tarihi</label>
+                            <input type="datetime-local" id="purchaseDate" class="form-control py-2 shadow-sm">
+                        </div>
+                        <div class="mb-0">
+                            <label class="form-label small fw-bold text-muted mb-1">Açıklama / Not</label>
+                            <textarea id="purchaseNote" class="form-control shadow-sm" rows="3" placeholder="Fiş ile ilgili eklemek istediğiniz notlar..."></textarea>
+                        </div>
                     </div>
                 </div>
             </div>
             
             <!-- Sağ Taraf: Sepet Listesi -->
-            <div class="col-md-7">
+            <div class="col-lg-7">
                 <div class="card border-0 shadow-sm h-100">
-                    <div class="card-body d-flex flex-column">
+                    <div class="card-body p-4 d-flex flex-column">
                         <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h6 class="card-title fw-bold mb-0">Sepet İçeriği</h6>
-                            <button class="btn btn-sm btn-outline-danger" onclick="clearCart()"><i class="fa-solid fa-trash me-1"></i>Temizle</button>
+                            <h6 class="card-title fw-bold text-dark mb-0"><i class="fa-solid fa-boxes-packing text-warning me-2"></i> Sepet İçeriği</h6>
+                            <button class="btn btn-sm btn-outline-danger shadow-sm" onclick="clearCart()">
+                                <i class="fa-solid fa-trash me-1"></i> Sepeti Temizle
+                            </button>
                         </div>
                         
-                        <div class="table-responsive flex-grow-1" style="min-height: 250px;">
-                            <table class="table table-hover align-middle">
-                                <thead class="table-light">
+                        <div class="table-responsive flex-grow-1 mb-4" style="min-height: 320px; max-height: 400px; overflow-y: auto;">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light sticky-top">
                                     <tr>
                                         <th>Ürün Adı</th>
-                                        <th style="width: 100px;">Birim Fiyat</th>
-                                        <th style="width: 120px;">Miktar</th>
-                                        <th style="width: 100px;">Ara Toplam</th>
-                                        <th style="width: 50px;"></th>
+                                        <th style="width: 120px;">Birim Alış F. (₺)</th>
+                                        <th style="width: 110px;">Alınan Miktar</th>
+                                        <th style="width: 110px;" class="text-end">Ara Toplam</th>
+                                        <th style="width: 50px;" class="text-end"></th>
                                     </tr>
                                 </thead>
                                 <tbody id="cartTableBody">
-                                    <!-- JS İLE BURAYA SATIRLAR EKLENECEK ÖRNEK SATIR: -->
                                     <tr>
-                                        <td colspan="5" class="text-center text-muted py-4">Sepette henüz ürün yok.</td>
+                                        <td colspan="5" class="text-center text-muted py-5">Sepette henüz ürün yok.</td>
                                     </tr>
                                 </tbody>
                             </table>
                         </div>
                         
-                        <div class="border-top pt-3 mt-auto">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <h5>Genel Toplam:</h5>
-                                <h3 class="text-primary fw-bold mb-0" id="cartTotal">₺0.00</h3>
+                        <div class="border-top pt-4 mt-auto">
+                            <div class="d-flex justify-content-between align-items-center bg-light p-3 rounded shadow-sm">
+                                <h5 class="mb-0 fw-bold text-dark">Genel Toplam:</h5>
+                                <h2 class="text-success fw-bold mb-0" id="cartTotal">₺0.00</h2>
                             </div>
                         </div>
                     </div>
@@ -131,182 +130,292 @@ $page_title = 'Mal Alış (Tedarik) İşlemleri';
             </div>
         </div>
       </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
-        <button type="button" class="btn btn-success px-4" onclick="completePurchaseFi()"><i class="fa-solid fa-check me-2"></i>Fişi Kaydet</button>
+      <div class="modal-footer bg-white py-3 border-0">
+        <button type="button" class="btn btn-secondary px-4 fw-bold shadow-sm" data-bs-dismiss="modal">İptal</button>
+        <button type="button" class="btn btn-success px-5 fw-bold shadow-sm" onclick="completePurchaseFi()">
+            <i class="fa-solid fa-check me-2"></i> Alış Fişini Kaydet
+        </button>
       </div>
     </div>
   </div>
 </div>
 
 <script>
-    /* =========================================================================
-       MAL ALIŞ (TEDARİK) SEPETİ - JAVASCRIPT İSKELETİ
-       Aşağıdaki fonksiyonların içini kendi mantığına göre doldurabilirsin.
-       Ben JS kodlamada neleri açman gerektiğini ayarladım.
-    ========================================================================= */
+let purchaseCart = [];
+let cartModalInstance = null;
 
-    // Sepet verilerini tutacağın dizi (Array)
-    let purchaseCart = []; 
+document.addEventListener("DOMContentLoaded", function() {
+    alisHareketleriniGetir();
+    // Tarih alanına şu anki zamanı varsayılan atayalım
+    let now = new Date();
+    now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+    document.getElementById('purchaseDate').value = now.toISOString().slice(0,16);
+});
 
-    // 1. Yeni Alış Fişi Modalı Açma Fonksiyonu
-    function openCartModal() {
-        // Modal'ı açmak için Bootstrap JS kodunu kullanıyoruz
-        var myModal = new bootstrap.Modal(document.getElementById('cartModal'));
-        myModal.show();
-        
-        // Modal açıldığında barkod inputuna odaklansın
-        setTimeout(() => {
-            document.getElementById('barcodeInput').focus();
-        }, 500);
+// 1. Geçmiş Alış Hareketlerini Getirme
+function alisHareketleriniGetir() {
+    let baslangic = document.getElementById('startDate').value;
+    let bitis = document.getElementById('endDate').value;
+
+    let formData = new FormData();
+    formData.append('baslangic', baslangic);
+    formData.append('bitis', bitis);
+
+    fetch("ajax/alis_hareketleri_getir.php", {
+        method: "POST",
+        body: formData
+    })
+    .then(response => response.text())
+    .then(data => {
+        document.getElementById('alisHareketleriListesi').innerHTML = data;
+    })
+    .catch(error => console.error("Alış hareketleri getirme hatası:", error));
+}
+
+function tarihFiltresiniTemizle() {
+    document.getElementById('startDate').value = "";
+    document.getElementById('endDate').value = "";
+    alisHareketleriniGetir();
+}
+
+// 2. Alış Fişi Modalı Açma
+function openCartModal() {
+    if (!cartModalInstance) {
+        cartModalInstance = new bootstrap.Modal(document.getElementById('cartModal'));
+    }
+    cartModalInstance.show();
+    setTimeout(() => document.getElementById('barcodeInput').focus(), 500);
+}
+
+// 3. Barkod ile Ürün Arama ve Sepete Ekleme
+function searchAndAddProduct() {
+    let barkod = document.getElementById('barcodeInput').value.trim();
+    if (!barkod) {
+        Swal.fire({icon: 'warning', title: 'Uyarı', text: 'Lütfen bir barkod girin veya okutun!', timer: 1500, showConfirmButton: false});
+        return;
     }
 
-    // 2. Barkod ile ürünü aratıp sepete ekleme
-    function searchAndAddProduct() {
-        let barcode = document.getElementById('barcodeInput').value;
-        if(barcode.trim() === "") {
-            alert("Lütfen bir barkod girin!");
-            return;
-        }
+    let formData = new FormData();
+    formData.append('barkod', barkod);
 
-        // TODO: AJAX/Fetch ile veritabanından barkoda göre ürünü bul.
-        // Bulunan ürünü sepete eklemek için addToCart() fonksiyonunu çağır.
-        console.log("Aranan Barkod: " + barcode);
-        
-        // Örnek sahte ürün eklemesi (Sen burayı sileceksin, fetch ile gelen veriyi ekleyeceksin)
-        // addToCart({ id: 1, name: "Test Ürün", price: 50.00 }, 1);
-        
-        document.getElementById('barcodeInput').value = ""; // Inputu temizle
-    }
-
-    // 3. Ürün listesi modalını veya alanını açma (Manuel seçim için)
-    function showProductList() {
-        // TODO: Ürünlerin listelendiği ayrı bir modal açabilirsin.
-        console.log("Ürün listesi açılıyor...");
-    }
-
-    // 4. Sepete ürün ekleme fonksiyonu
-    function addToCart(product, quantity) {
-        // TODO: Ürün zaten sepette varsa (purchaseCart dizisinde) miktarını artır.
-        // Yoksa diziye yeni eleman olarak ekle.
-        
-        // Örnek mantık:
-        /*
-        let existingItem = purchaseCart.find(item => item.id === product.id);
-        if(existingItem) {
-            existingItem.qty += quantity;
+    fetch("ajax/urun_arama_alis.php", {
+        method: "POST",
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.bulundu) {
+            addToCart(data.urun, 1);
+            document.getElementById('barcodeInput').value = "";
         } else {
-            purchaseCart.push({ ...product, qty: quantity });
+            Swal.fire('Bulunamadı', data.mesaj, 'warning');
         }
-        */
-        
-        updateCartUI(); // Ekledikten sonra arayüzü güncelle
-    }
+    })
+    .catch(error => console.error("Arama hatası:", error));
+}
 
-    // 5. Sepetten ürün çıkarma fonksiyonu
-    function removeFromCart(productId) {
-        // TODO: purchaseCart dizisinden productId'ye sahip ürünü sil.
-        
-        // Örnek mantık:
-        // purchaseCart = purchaseCart.filter(item => item.id !== productId);
-        
-        updateCartUI(); // Sildikten sonra arayüzü güncelle
-    }
+// 4. Sistemdeki Ürünler Listesini Açma (Manuel Seçim)
+function showProductList() {
+    Swal.fire({
+        title: 'Sistemdeki Ürünler',
+        html: `<div id="urunListesiAlani"><div class="spinner-border text-primary my-4"></div></div>`,
+        width: '800px',
+        showConfirmButton: false,
+        showCloseButton: true,
+        didOpen: () => {
+            fetch("ajax/urun_listesi_alis.php")
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('urunListesiAlani').innerHTML = data;
+            });
+        }
+    });
+}
 
-    // 6. Sepetteki bir ürünün miktarını veya alış fiyatını değiştirme
-    function updateItemData(productId, newQty, newPrice) {
-        // TODO: Sepetteki ürünün miktar veya fiyat inputları değiştiğinde diziyi güncelle
-        
-        updateCartUI(); // Değişiklikten sonra arayüzü güncelle (Genel toplam vs.)
-    }
+function secilenUrunuSepeteEkle(urun) {
+    addToCart(urun, 1);
+    Swal.fire({
+        icon: 'success',
+        title: 'Eklendi',
+        text: `${urun.ad} sepete eklendi.`,
+        timer: 1000,
+        showConfirmButton: false
+    });
+}
 
-    // 7. Sepeti tamamen boşaltma
-    function clearCart() {
-        if(confirm("Sepeti temizlemek istediğinize emin misiniz?")) {
+// 5. Sepete Ürün Ekleme / Miktar Artırma
+function addToCart(urun, miktar) {
+    let existing = purchaseCart.find(item => item.id === urun.id);
+    if (existing) {
+        existing.qty += miktar;
+    } else {
+        purchaseCart.push({ id: urun.id, barkod: urun.barkod, ad: urun.ad, price: urun.alis_fiyati, qty: miktar });
+    }
+    updateCartUI();
+}
+
+// 6. Sepetten Ürün Çıkarma
+function removeFromCart(id) {
+    purchaseCart = purchaseCart.filter(item => item.id !== id);
+    updateCartUI();
+}
+
+// 7. Sepetteki Miktar veya Fiyatı Güncelleme
+function updateItemData(id, newQty, newPrice) {
+    let item = purchaseCart.find(i => i.id === id);
+    if (item) {
+        item.qty = Math.max(1, parseInt(newQty) || 1);
+        item.price = Math.max(0, parseFloat(newPrice) || 0);
+    }
+    updateCartUI();
+}
+
+// 8. Sepeti Temizleme
+function clearCart() {
+    if (purchaseCart.length === 0) return;
+    Swal.fire({
+        title: 'Sepeti Temizle',
+        text: 'Alış sepetindeki tüm ürünleri silmek istediğinize emin misiniz?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Evet, Temizle',
+        cancelButtonText: 'İptal'
+    }).then((result) => {
+        if (result.isConfirmed) {
             purchaseCart = [];
             updateCartUI();
+            Swal.fire({icon: 'success', title: 'Temizlendi', timer: 1000, showConfirmButton: false});
         }
+    });
+}
+
+// 9. Sepet Arayüzünü Güncelleme
+function updateCartUI() {
+    let tableBody = document.getElementById('cartTableBody');
+    let totalElement = document.getElementById('cartTotal');
+    
+    tableBody.innerHTML = "";
+    let grandTotal = 0;
+
+    if (purchaseCart.length === 0) {
+        tableBody.innerHTML = `<tr><td colspan="5" class="text-center text-muted py-5">Sepette henüz ürün yok.</td></tr>`;
+        totalElement.innerText = "₺0.00";
+        return;
     }
 
-    // 8. Sepet Arayüzünü (Tabloyu ve Toplamı) Güncelleme
-    function updateCartUI() {
-        let tableBody = document.getElementById('cartTableBody');
-        let totalElement = document.getElementById('cartTotal');
+    purchaseCart.forEach(item => {
+        let lineTotal = item.price * item.qty;
+        grandTotal += lineTotal;
         
-        tableBody.innerHTML = ""; // Tabloyu temizle
-        let grandTotal = 0;
+        tableBody.innerHTML += `
+            <tr>
+                <td>
+                    <div class="fw-bold text-dark">${item.ad}</div>
+                    <div class="text-muted fs-7">${item.barkod}</div>
+                </td>
+                <td>
+                    <input type="number" step="0.01" min="0" value="${item.price}" onchange="updateItemData(${item.id}, ${item.qty}, this.value)" class="form-control form-control-sm py-1 fw-bold text-primary">
+                </td>
+                <td>
+                    <input type="number" min="1" value="${item.qty}" onchange="updateItemData(${item.id}, this.value, ${item.price})" class="form-control form-control-sm py-1 fw-bold">
+                </td>
+                <td class="text-end fw-bold text-dark">₺${lineTotal.toFixed(2)}</td>
+                <td class="text-end">
+                    <button class="btn btn-sm btn-outline-danger shadow-sm" onclick="removeFromCart(${item.id})" title="Sil">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </td>
+            </tr>
+        `;
+    });
 
-        if(purchaseCart.length === 0) {
-            tableBody.innerHTML = `<tr><td colspan="5" class="text-center text-muted py-4">Sepette henüz ürün yok.</td></tr>`;
-            totalElement.innerText = "₺0.00";
-            return;
+    totalElement.innerText = "₺" + grandTotal.toFixed(2);
+}
+
+// 10. Alış Fişini Kaydetme (Backend'e Gönderme)
+function completePurchaseFi() {
+    if (purchaseCart.length === 0) {
+        Swal.fire('Sepet Boş', 'Lütfen alış fişine en az bir ürün ekleyin.', 'warning');
+        return;
+    }
+    
+    let tedarikci = document.getElementById('supplierName').value.trim();
+    let tarih = document.getElementById('purchaseDate').value;
+    let not = document.getElementById('purchaseNote').value.trim();
+
+    Swal.fire({
+        title: 'Fişi Kaydet',
+        text: 'Mal alış fişini kaydetmek ve stokları artırmak istediğinize emin misiniz?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#28a745',
+        cancelButtonColor: '#d33',
+        confirmButtonText: '<i class="fa-solid fa-check me-1"></i> Evet, Kaydet',
+        cancelButtonText: 'İptal'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            let payload = {
+                tedarikci: tedarikci,
+                tarih: tarih,
+                not: not,
+                sepet: purchaseCart
+            };
+
+            fetch("ajax/alis_yap.php", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.basarili) {
+                    Swal.fire({
+                        title: 'Başarılı!',
+                        text: data.mesaj,
+                        icon: 'success',
+                        confirmButtonText: 'Tamam'
+                    }).then(() => {
+                        purchaseCart = [];
+                        updateCartUI();
+                        document.getElementById('supplierName').value = "";
+                        document.getElementById('purchaseNote').value = "";
+                        if (cartModalInstance) cartModalInstance.hide();
+                        alisHareketleriniGetir();
+                    });
+                } else {
+                    Swal.fire('Hata!', data.mesaj, 'error');
+                }
+            })
+            .catch(error => {
+                console.error("Kayıt hatası:", error);
+                Swal.fire('Hata!', 'Sunucu ile iletişim kurulurken bir hata oluştu.', 'error');
+            });
         }
+    });
+}
 
-        // TODO: purchaseCart dizisinde dön (map/forEach) ve tablo satırlarını (<tr>) oluşturup tableBody.innerHTML içine ekle.
-        // Ayrıca grandTotal'i hesapla.
-        /*
-        purchaseCart.forEach(item => {
-            let lineTotal = item.price * item.qty;
-            grandTotal += lineTotal;
-            
-            tableBody.innerHTML += `
-                <tr>
-                    <td>${item.name}</td>
-                    <td><input type="number" value="${item.price}" onchange="updateItemData(${item.id}, ${item.qty}, this.value)" class="form-control form-control-sm"></td>
-                    <td><input type="number" value="${item.qty}" onchange="updateItemData(${item.id}, this.value, ${item.price})" class="form-control form-control-sm"></td>
-                    <td>₺${lineTotal.toFixed(2)}</td>
-                    <td><button class="btn btn-sm btn-danger" onclick="removeFromCart(${item.id})"><i class="fa-solid fa-trash"></i></button></td>
-                </tr>
-            `;
+// 11. Alış Detay İnceleme Modalı
+function alisDetayGoster(islemKodu) {
+    let formData = new FormData();
+    formData.append('islem_kodu', islemKodu);
+
+    fetch("ajax/alis_detay_modal_getir.php", {
+        method: "POST",
+        body: formData
+    })
+    .then(response => response.text())
+    .then(data => {
+        Swal.fire({
+            title: `Fiş Detayı: ${islemKodu}`,
+            html: data,
+            width: '800px',
+            showConfirmButton: true,
+            confirmButtonText: 'Kapat',
+            confirmButtonColor: '#3085d6'
         });
-        */
-
-        totalElement.innerText = "₺" + grandTotal.toFixed(2);
-    }
-
-    // 9. Alış Fişini Kaydetme (Veritabanına Gönderme)
-    function completePurchaseFi() {
-        if(purchaseCart.length === 0) {
-            alert("Sepet boş! Önce ürün ekleyin.");
-            return;
-        }
-        
-        let supplierName = document.getElementById('supplierName').value;
-        let date = document.getElementById('purchaseDate').value;
-        let note = document.getElementById('purchaseNote').value;
-
-        // TODO: Sepet dizisini (purchaseCart) ve fiş bilgilerini (tedarikçi, tarih vs.) AJAX/Fetch ile PHP'ye (backend) yolla.
-        // PHP tarafında bu verileri veritabanına kaydet (Alışlar ve Alış Detayları tablolarına) ve stoğu artır.
-        console.log("Gönderilecek Veriler:", {
-            supplier: supplierName,
-            date: date,
-            note: note,
-            items: purchaseCart
-        });
-        
-        alert("Fiş başarıyla kaydedildi! (Bu sadece simülasyon, backend kodunu yazacaksınız)");
-        
-        // Kayıttan sonra:
-        // clearCart();
-        // Modal'ı kapat: bootstrap.Modal.getInstance(document.getElementById('cartModal')).hide();
-    }
-
-    // 10. Tarihe Göre Filtreleme (Ana ekrandaki tablo için)
-    function filterByDate() {
-        let start = document.getElementById('startDate').value;
-        let end = document.getElementById('endDate').value;
-        
-        if(!start || !end) {
-            alert("Lütfen başlangıç ve bitiş tarihlerini seçin.");
-            return;
-        }
-
-        // TODO: Bu tarihleri kullanarak AJAX ile geçmiş alışları getir ve ana ekrandaki tabloyu (Son Alış Hareketleri) güncelle.
-        // Ya da formu submit ettirerek PHP ile sayfayı yenile.
-        console.log(`Tarih Filtresi: ${start} - ${end}`);
-        alert(`${start} ve ${end} arasındaki kayıtlar getirilecek.`);
-    }
-
+    })
+    .catch(error => console.error("Detay getirme hatası:", error));
+}
 </script>
-
-// footer is now included in index.php
