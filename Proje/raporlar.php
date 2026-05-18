@@ -1,36 +1,37 @@
 <?php 
 $page_title = 'Finans ve Detaylı Raporlar';
-// header is now included in index.php
 ?>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <style>
-    /* Özelleştirilmiş Tasarım Sınıfları */
     .view-toggle-btn {
         background: transparent;
         border: none;
         color: #64748b;
         font-weight: 600;
-        padding: 8px 16px;
+        padding: 10px 20px;
         border-radius: 8px;
         transition: all 0.3s ease;
     }
     .view-toggle-btn.active {
         background-color: #1e293b;
         color: white;
+        box-shadow: 0 4px 12px rgba(30, 41, 59, 0.15);
     }
     .report-card {
         border: none;
         border-radius: 12px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.03);
     }
     .icon-box {
-        width: 48px;
-        height: 48px;
-        border-radius: 10px;
+        width: 54px;
+        height: 54px;
+        border-radius: 12px;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 1.5rem;
+        font-size: 1.6rem;
     }
     .icon-box.blue { background-color: #eff6ff; color: #3b82f6; }
     .icon-box.yellow { background-color: #fefce8; color: #eab308; }
@@ -46,11 +47,18 @@ $page_title = 'Finans ve Detaylı Raporlar';
 </style>
 
 <!-- GÖRÜNÜM SEÇİCİ -->
-<div class="card report-card mb-4">
-    <div class="card-body py-3">
+<div class="card report-card mb-4 bg-white border-0">
+    <div class="card-body py-3 px-4 d-flex flex-wrap justify-content-between align-items-center">
         <div class="d-flex gap-2">
-            <button class="view-toggle-btn active" id="btnAylik" onclick="switchView('aylik')">Aylık Görünüm</button>
-            <button class="view-toggle-btn" id="btnYillik" onclick="switchView('yillik')">Yıllık Görünüm</button>
+            <button class="view-toggle-btn active" id="btnAylik" onclick="switchView('aylik')">
+                <i class="fa-solid fa-calendar-days me-2"></i> Aylık Görünüm
+            </button>
+            <button class="view-toggle-btn" id="btnYillik" onclick="switchView('yillik')">
+                <i class="fa-solid fa-chart-pie me-2"></i> Yıllık Görünüm
+            </button>
+        </div>
+        <div class="text-muted small mt-2 mt-md-0">
+            <i class="fa-solid fa-circle-info me-1 text-primary"></i> Satışlar ve İadeler net ciroya otomatik yansıtılmaktadır.
         </div>
     </div>
 </div>
@@ -58,62 +66,74 @@ $page_title = 'Finans ve Detaylı Raporlar';
 <!-- ================= AYLIK GÖRÜNÜM ALANI ================= -->
 <div id="aylikGorunum">
     <!-- Filtreler -->
-    <div class="row mb-4">
-        <div class="col-md-3">
-            <select class="form-select" id="aySecimi" onchange="fetchAylikVeri()">
-                <option value="1">Ocak</option>
-                <option value="2">Şubat</option>
-                <option value="3">Mart</option>
-                <option value="4">Nisan</option>
-                <option value="5" selected>Mayıs</option>
-                <option value="6">Haziran</option>
-                <option value="7">Temmuz</option>
-                <option value="8">Ağustos</option>
-                <option value="9">Eylül</option>
-                <option value="10">Ekim</option>
-                <option value="11">Kasım</option>
-                <option value="12">Aralık</option>
-            </select>
-        </div>
-        <div class="col-md-3">
-            <select class="form-select" id="yilSecimiAylik" onchange="fetchAylikVeri()">
-                <option value="2025">2025</option>
-                <option value="2026" selected>2026</option>
-            </select>
+    <div class="card report-card mb-4 bg-white border-0">
+        <div class="card-body p-4">
+            <div class="row g-3 align-items-center">
+                <div class="col-md-3">
+                    <label class="form-label small fw-bold text-muted mb-1">Rapor Ayı</label>
+                    <select class="form-select py-2 shadow-sm" id="aySecimi" onchange="fetchAylikVeri()">
+                        <option value="1">Ocak</option>
+                        <option value="2">Şubat</option>
+                        <option value="3">Mart</option>
+                        <option value="4">Nisan</option>
+                        <option value="5" selected>Mayıs</option>
+                        <option value="6">Haziran</option>
+                        <option value="7">Temmuz</option>
+                        <option value="8">Ağustos</option>
+                        <option value="9">Eylül</option>
+                        <option value="10">Ekim</option>
+                        <option value="11">Kasım</option>
+                        <option value="12">Aralık</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small fw-bold text-muted mb-1">Rapor Yılı</label>
+                    <select class="form-select py-2 shadow-sm" id="yilSecimiAylik" onchange="fetchAylikVeri()">
+                        <option value="2025">2025</option>
+                        <option value="2026" selected>2026</option>
+                        <option value="2027">2027</option>
+                    </select>
+                </div>
+                <div class="col-md-6 text-md-end mt-4 mt-md-0">
+                    <button class="btn btn-primary px-4 py-2 fw-bold shadow-sm" onclick="fetchAylikVeri()">
+                        <i class="fa-solid fa-rotate me-2"></i> Verileri Yenile
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 
     <!-- İstatistik Kartları -->
     <div class="row g-4 mb-4">
         <div class="col-md-4">
-            <div class="card report-card h-100">
-                <div class="card-body d-flex align-items-center">
-                    <div class="icon-box blue me-3"><i class="fa-solid fa-wallet"></i></div>
+            <div class="card report-card h-100 bg-white border-0 border-start border-4 border-primary shadow-sm">
+                <div class="card-body p-4 d-flex align-items-center">
+                    <div class="icon-box blue me-4"><i class="fa-solid fa-wallet"></i></div>
                     <div>
-                        <div class="text-muted small fw-bold mb-1" id="aylikCiroBaslik">MAYIS AYI TOPLAM CİRO</div>
-                        <h3 class="fw-bold mb-0" id="aylikCiroDeger">0,00 ₺</h3>
+                        <div class="text-muted small fw-bold mb-1" id="aylikCiroBaslik">MAYIS AYI NET CİRO</div>
+                        <h3 class="fw-bold mb-0 text-dark" id="aylikCiroDeger">0,00 ₺</h3>
                     </div>
                 </div>
             </div>
         </div>
         <div class="col-md-4">
-            <div class="card report-card h-100">
-                <div class="card-body d-flex align-items-center">
-                    <div class="icon-box yellow me-3"><i class="fa-solid fa-box"></i></div>
+            <div class="card report-card h-100 bg-white border-0 border-start border-4 border-warning shadow-sm">
+                <div class="card-body p-4 d-flex align-items-center">
+                    <div class="icon-box yellow me-4"><i class="fa-solid fa-box"></i></div>
                     <div>
                         <div class="text-muted small fw-bold mb-1" id="aylikUrunBaslik">MAYIS AYI SATILAN ÜRÜN</div>
-                        <h3 class="fw-bold mb-0" id="aylikUrunDeger">0 Adet</h3>
+                        <h3 class="fw-bold mb-0 text-dark" id="aylikUrunDeger">0 Adet</h3>
                     </div>
                 </div>
             </div>
         </div>
         <div class="col-md-4">
-            <div class="card report-card h-100">
-                <div class="card-body d-flex align-items-center">
-                    <div class="icon-box green me-3"><i class="fa-solid fa-cart-shopping"></i></div>
+            <div class="card report-card h-100 bg-white border-0 border-start border-4 border-success shadow-sm">
+                <div class="card-body p-4 d-flex align-items-center">
+                    <div class="icon-box green me-4"><i class="fa-solid fa-cart-shopping"></i></div>
                     <div>
-                        <div class="text-muted small fw-bold mb-1">TESLİM EDİLMİŞ SİPARİŞ</div>
-                        <h3 class="fw-bold mb-0" id="aylikSiparisDeger">0 Adet</h3>
+                        <div class="text-muted small fw-bold mb-1">TAMAMLANAN SİPARİŞ</div>
+                        <h3 class="fw-bold mb-0 text-dark" id="aylikSiparisDeger">0 Adet</h3>
                     </div>
                 </div>
             </div>
@@ -121,23 +141,23 @@ $page_title = 'Finans ve Detaylı Raporlar';
     </div>
 
     <!-- Satış Özeti Tablosu -->
-    <div class="card report-card">
-        <div class="card-body">
-            <h6 class="fw-bold mb-4" id="aylikTabloBaslik">Mayıs Ayı Satış Özeti</h6>
-            <div class="table-responsive">
-                <table class="table align-middle">
-                    <thead class="table-light">
+    <div class="card report-card bg-white border-0 shadow-sm">
+        <div class="card-body p-4">
+            <h5 class="fw-bold text-dark mb-4" id="aylikTabloBaslik"><i class="fa-solid fa-list-check text-primary me-2"></i> Mayıs Ayı Satış ve İade Özeti</h5>
+            <div class="table-responsive" style="max-height: 450px; overflow-y: auto;">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light sticky-top">
                         <tr>
-                            <th class="table-header border-0">TARİH</th>
-                            <th class="table-header border-0">ÜRÜN ADI</th>
+                            <th class="table-header border-0 ps-4">TARİH / FİŞ KODU</th>
+                            <th class="table-header border-0">ÜRÜN ADI / TİP</th>
                             <th class="table-header border-0 text-center">ADET</th>
                             <th class="table-header border-0 text-end">BİRİM FİYAT</th>
-                            <th class="table-header border-0 text-end">TOPLAM TUTAR</th>
+                            <th class="table-header border-0 text-end pe-4">TOPLAM TUTAR</th>
                         </tr>
                     </thead>
                     <tbody id="aylikTabloGovde">
                         <tr>
-                            <td colspan="5" class="text-center py-4 text-muted">Bu aya ait satış bulunamadı.</td>
+                            <td colspan="5" class="text-center py-5 text-muted">Yükleniyor...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -149,35 +169,46 @@ $page_title = 'Finans ve Detaylı Raporlar';
 <!-- ================= YILLIK GÖRÜNÜM ALANI ================= -->
 <div id="yillikGorunum" style="display: none;">
     <!-- Filtreler -->
-    <div class="row mb-4">
-        <div class="col-md-3">
-            <select class="form-select" id="yilSecimiYillik" onchange="fetchYillikVeri()">
-                <option value="2025">2025 Yılı</option>
-                <option value="2026" selected>2026 Yılı</option>
-            </select>
+    <div class="card report-card mb-4 bg-white border-0 shadow-sm">
+        <div class="card-body p-4">
+            <div class="row g-3 align-items-center">
+                <div class="col-md-3">
+                    <label class="form-label small fw-bold text-muted mb-1">Rapor Yılı</label>
+                    <select class="form-select py-2 shadow-sm" id="yilSecimiYillik" onchange="fetchYillikVeri()">
+                        <option value="2025">2025 Yılı</option>
+                        <option value="2026" selected>2026 Yılı</option>
+                        <option value="2027">2027 Yılı</option>
+                    </select>
+                </div>
+                <div class="col-md-9 text-md-end mt-4 mt-md-0">
+                    <button class="btn btn-primary px-4 py-2 fw-bold shadow-sm" onclick="fetchYillikVeri()">
+                        <i class="fa-solid fa-rotate me-2"></i> Verileri Yenile
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 
     <!-- İstatistik Kartları -->
     <div class="row g-4 mb-4">
         <div class="col-md-6">
-            <div class="card report-card h-100">
-                <div class="card-body d-flex align-items-center border-start border-4 border-primary rounded">
-                    <div class="icon-box blue me-3" style="background-color: #eff6ff;"><i class="fa-solid fa-chart-line"></i></div>
+            <div class="card report-card h-100 bg-white border-0 border-start border-4 border-primary shadow-sm">
+                <div class="card-body p-4 d-flex align-items-center">
+                    <div class="icon-box blue me-4"><i class="fa-solid fa-chart-line"></i></div>
                     <div>
-                        <div class="text-muted small fw-bold mb-1">YILLIK TOPLAM HASILAT</div>
-                        <h3 class="fw-bold mb-0" id="yillikCiroDeger">88.900,00 ₺</h3>
+                        <div class="text-muted small fw-bold mb-1">YILLIK NET HASILAT (SATIS - IADE)</div>
+                        <h2 class="fw-bold mb-0 text-primary" id="yillikCiroDeger">0,00 ₺</h2>
                     </div>
                 </div>
             </div>
         </div>
         <div class="col-md-6">
-            <div class="card report-card h-100">
-                <div class="card-body d-flex align-items-center border-start border-4 border-warning rounded">
-                    <div class="icon-box yellow me-3" style="background-color: #fefce8;"><i class="fa-solid fa-award"></i></div>
+            <div class="card report-card h-100 bg-white border-0 border-start border-4 border-warning shadow-sm">
+                <div class="card-body p-4 d-flex align-items-center">
+                    <div class="icon-box yellow me-4"><i class="fa-solid fa-award"></i></div>
                     <div>
-                        <div class="text-muted small fw-bold mb-1">YILIN EN ÇOK SATILANI</div>
-                        <h6 class="fw-bold mb-0" id="yillikEnCokSatan">iPhone 15 Pro Max 256 GB - Naturel Titanyum (1 Adet)</h6>
+                        <div class="text-muted small fw-bold mb-1">YILIN EN ÇOK SATILAN ÜRÜNÜ</div>
+                        <h5 class="fw-bold mb-0 text-dark" id="yillikEnCokSatan">Yükleniyor...</h5>
                     </div>
                 </div>
             </div>
@@ -185,33 +216,23 @@ $page_title = 'Finans ve Detaylı Raporlar';
     </div>
 
     <!-- Aylık Ciro Dağılımı Tablosu -->
-    <div class="card report-card">
-        <div class="card-body">
-            <h6 class="fw-bold mb-4" id="yillikTabloBaslik">2026 Yılı Aylık Ciro Dağılımı</h6>
+    <div class="card report-card bg-white border-0 shadow-sm">
+        <div class="card-body p-4">
+            <h5 class="fw-bold text-dark mb-4" id="yillikTabloBaslik"><i class="fa-solid fa-calendar-grid-58 text-success me-2"></i> 2026 Yılı Aylık Hasılat Dağılımı</h5>
             <div class="table-responsive">
-                <table class="table align-middle">
+                <table class="table table-hover align-middle mb-0">
                     <thead class="table-light">
                         <tr>
-                            <th class="table-header border-0">AY</th>
+                            <th class="table-header border-0 ps-4">AY</th>
                             <th class="table-header border-0 text-center">TAMAMLANAN SİPARİŞ</th>
                             <th class="table-header border-0 text-center">SATILAN ÜRÜN (ADET)</th>
-                            <th class="table-header border-0 text-end">AYLIK CİRO</th>
+                            <th class="table-header border-0 text-end pe-4">NET AYLIK CİRO</th>
                         </tr>
                     </thead>
                     <tbody id="yillikTabloGovde">
                         <tr>
-                            <td>Ocak</td><td class="text-center">-</td><td class="text-center">-</td><td class="text-end">-</td>
+                            <td colspan="4" class="text-center py-5 text-muted">Yükleniyor...</td>
                         </tr>
-                        <tr>
-                            <td>Şubat</td><td class="text-center">-</td><td class="text-center">-</td><td class="text-end">-</td>
-                        </tr>
-                        <tr>
-                            <td class="fw-bold">Mart</td><td class="text-center">1</td><td class="text-center">2</td><td class="text-end fw-bold text-success">88.900,00 ₺</td>
-                        </tr>
-                        <tr>
-                            <td>Nisan</td><td class="text-center">-</td><td class="text-center">-</td><td class="text-end">-</td>
-                        </tr>
-                        <!-- Diğer aylar JS ile doldurulacak -->
                     </tbody>
                 </table>
             </div>
@@ -220,77 +241,88 @@ $page_title = 'Finans ve Detaylı Raporlar';
 </div>
 
 <script>
-    /* =========================================================================
-       RAPORLAR SAYFASI - JAVASCRIPT İSKELETİ
-       Aşağıdaki JS kodları ile yeni oluşturduğun IslemManager sınıfındaki
-       tarihFiltrele(), encokSatisYapanUrunler() vb. metodlarına AJAX istekleri atabilirsin.
-    ========================================================================= */
+document.addEventListener('DOMContentLoaded', () => {
+    // Sayfa açıldığında şu anki ayı seçili yapalım
+    let currentMonth = new Date().getMonth() + 1;
+    document.getElementById('aySecimi').value = currentMonth;
+    fetchAylikVeri();
+});
 
-    // 1. Görünüm Değiştirme (Aylık / Yıllık)
-    function switchView(viewName) {
-        // Buton stillerini ayarla
-        document.getElementById('btnAylik').classList.remove('active');
-        document.getElementById('btnYillik').classList.remove('active');
-        
-        // İçerikleri gizle
-        document.getElementById('aylikGorunum').style.display = 'none';
-        document.getElementById('yillikGorunum').style.display = 'none';
+// 1. Görünüm Değiştirme (Aylık / Yıllık)
+function switchView(viewName) {
+    document.getElementById('btnAylik').classList.remove('active');
+    document.getElementById('btnYillik').classList.remove('active');
+    
+    document.getElementById('aylikGorunum').style.display = 'none';
+    document.getElementById('yillikGorunum').style.display = 'none';
 
-        if(viewName === 'aylik') {
-            document.getElementById('btnAylik').classList.add('active');
-            document.getElementById('aylikGorunum').style.display = 'block';
-            fetchAylikVeri();
-        } else {
-            document.getElementById('btnYillik').classList.add('active');
-            document.getElementById('yillikGorunum').style.display = 'block';
-            fetchYillikVeri();
-        }
-    }
-
-    // 2. Aylık Verileri Çekme ve Arayüzü Güncelleme
-    function fetchAylikVeri() {
-        let aySelect = document.getElementById('aySecimi');
-        let ayAdi = aySelect.options[aySelect.selectedIndex].text;
-        let yil = document.getElementById('yilSecimiAylik').value;
-        let ayKodu = aySelect.value;
-
-        // Başlıkları Seçilen Aya Göre Dinamik Güncelle
-        document.getElementById('aylikCiroBaslik').innerText = `${ayAdi.toUpperCase()} AYI TOPLAM CİRO`;
-        document.getElementById('aylikUrunBaslik').innerText = `${ayAdi.toUpperCase()} AYI SATILAN ÜRÜN`;
-        document.getElementById('aylikTabloBaslik').innerText = `${ayAdi} Ayı Satış Özeti`;
-
-        console.log(`Aylık veri isteniyor: Yıl: ${yil}, Ay: ${ayKodu}`);
-        
-        // TODO: AJAX/Fetch ile kendi yazdığın IslemManager endpointine istek at.
-        // Örn: fetch('api/rapor_aylik.php?ay='+ayKodu+'&yil='+yil)
-        // Gelen JSON verisine göre aşağıdaki alanları güncelle:
-        // document.getElementById('aylikCiroDeger').innerText = veri.toplamCiro + " ₺";
-        // document.getElementById('aylikUrunDeger').innerText = veri.satilanAdet + " Adet";
-        // document.getElementById('aylikSiparisDeger').innerText = veri.siparisAdet + " Adet";
-        // document.getElementById('aylikTabloGovde').innerHTML = '... tablonun HTML satırları (<tr>) ...';
-    }
-
-    // 3. Yıllık Verileri Çekme ve Arayüzü Güncelleme
-    function fetchYillikVeri() {
-        let yil = document.getElementById('yilSecimiYillik').value;
-
-        // Başlık Güncelleme
-        document.getElementById('yillikTabloBaslik').innerText = `${yil} Yılı Aylık Ciro Dağılımı`;
-
-        console.log(`Yıllık veri isteniyor: Yıl: ${yil}`);
-
-        // TODO: AJAX/Fetch ile kendi yazdığın IslemManager endpointine istek at.
-        // Gelen JSON verisine göre aşağıdaki alanları güncelle:
-        // document.getElementById('yillikCiroDeger').innerText = veri.toplamYillikCiro + " ₺";
-        // document.getElementById('yillikEnCokSatan').innerText = veri.enCokSatanUrun;
-        // document.getElementById('yillikTabloGovde').innerHTML = '... 12 ayın HTML satırları (<tr>) ...';
-    }
-
-    // Sayfa yüklendiğinde varsayılan olarak Aylık görünüm verilerini çekmek için:
-    document.addEventListener('DOMContentLoaded', () => {
+    if (viewName === 'aylik') {
+        document.getElementById('btnAylik').classList.add('active');
+        document.getElementById('aylikGorunum').style.display = 'block';
         fetchAylikVeri();
-    });
+    } else {
+        document.getElementById('btnYillik').classList.add('active');
+        document.getElementById('yillikGorunum').style.display = 'block';
+        fetchYillikVeri();
+    }
+}
 
+// 2. Aylık Verileri Çekme
+function fetchAylikVeri() {
+    let aySelect = document.getElementById('aySecimi');
+    let ayAdi = aySelect.options[aySelect.selectedIndex].text;
+    let yil = document.getElementById('yilSecimiAylik').value;
+    let ayKodu = aySelect.value;
+
+    document.getElementById('aylikCiroBaslik').innerText = `${ayAdi.toUpperCase()} AYI NET CİRO`;
+    document.getElementById('aylikUrunBaslik').innerText = `${ayAdi.toUpperCase()} AYI SATILAN ÜRÜN`;
+    document.getElementById('aylikTabloBaslik').innerHTML = `<i class="fa-solid fa-list-check text-primary me-2"></i> ${ayAdi} Ayı Satış ve İade Özeti`;
+
+    let formData = new FormData();
+    formData.append('ay', ayKodu);
+    formData.append('yil', yil);
+
+    fetch("ajax/rapor_aylik_getir.php", {
+        method: "POST",
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.basarili) {
+            document.getElementById('aylikCiroDeger').innerText = data.net_ciro;
+            document.getElementById('aylikUrunDeger').innerText = data.satilan_adet;
+            document.getElementById('aylikSiparisDeger').innerText = data.siparis_adet;
+            document.getElementById('aylikTabloGovde').innerHTML = data.tablo_html;
+        } else {
+            Swal.fire('Hata!', data.mesaj, 'error');
+        }
+    })
+    .catch(error => console.error("Aylık rapor hatası:", error));
+}
+
+// 3. Yıllık Verileri Çekme
+function fetchYillikVeri() {
+    let yil = document.getElementById('yilSecimiYillik').value;
+
+    document.getElementById('yillikTabloBaslik').innerHTML = `<i class="fa-solid fa-calendar-grid-58 text-success me-2"></i> ${yil} Yılı Aylık Hasılat Dağılımı`;
+
+    let formData = new FormData();
+    formData.append('yil', yil);
+
+    fetch("ajax/rapor_yillik_getir.php", {
+        method: "POST",
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.basarili) {
+            document.getElementById('yillikCiroDeger').innerText = data.yillik_ciro;
+            document.getElementById('yillikEnCokSatan').innerText = data.en_cok_satan;
+            document.getElementById('yillikTabloGovde').innerHTML = data.tablo_html;
+        } else {
+            Swal.fire('Hata!', data.mesaj, 'error');
+        }
+    })
+    .catch(error => console.error("Yıllık rapor hatası:", error));
+}
 </script>
-
-// footer is now included in index.php
