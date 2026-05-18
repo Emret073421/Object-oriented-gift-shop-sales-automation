@@ -86,15 +86,14 @@ class IslemManager extends TemelManager {
         $birimFiyat = (float)$satir['birim_fiyat'];
         $iadeTutar = -($birimFiyat * $iadeMiktar); // İade olduğu için eksi tutar
 
-        // İade kaydını islemler tablosuna ekle (IADE koduyla)
-        $iadeKodu = str_replace('FIS-', 'IADE-', $islemKodu) . '-' . rand(100,999);
+        // İade kaydını islemler tablosuna ekle (Aynı islem_kodu ile, islem_tipi = 'IADE')
         $sqlIslem = "INSERT INTO islemler (islem_kodu, islem_tipi, urun_id, miktar, personel_id, birim_fiyat, toplam_tutar, musteri_bilgisi, aciklama) 
-                     VALUES ('$iadeKodu', 'IADE', $urunId, $iadeMiktar, $personelId, $birimFiyat, $iadeTutar, 'İade Müşterisi', '$aciklama')";
+                     VALUES ('$islemKodu', 'IADE', $urunId, $iadeMiktar, $personelId, $birimFiyat, $iadeTutar, 'İade Müşterisi', '$aciklama')";
         
         if ($this->db->query($sqlIslem)) {
             // Ürün stoğunu geri artır
             $this->db->query("UPDATE urunler SET stok_miktari = stok_miktari + $iadeMiktar WHERE id = $urunId");
-            return ['basarili' => true, 'mesaj' => 'İade işlemi başarıyla tamamlandı. Stok güncellendi.', 'iade_kodu' => $iadeKodu];
+            return ['basarili' => true, 'mesaj' => 'İade işlemi başarıyla tamamlandı. Stok güncellendi.', 'iade_kodu' => $islemKodu];
         }
 
         return ['basarili' => false, 'mesaj' => 'İade işlemi sırasında veritabanı hatası oluştu.'];
