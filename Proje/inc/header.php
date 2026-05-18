@@ -63,10 +63,10 @@ $current_page = $_GET['sayfa'] ?? 'dashboard';
         <div class="p-4 border-top border-secondary">
             <div class="small text-muted mb-2">Giriş Yapan:</div>
             <div class="d-flex align-items-center mb-3">
-                <img src="https://ui-avatars.com/api/?name=Admin+User&background=3498db&color=fff&rounded=true" width="40" class="me-2">
+                <img src="https://ui-avatars.com/api/?name=<?php echo urlencode($_SESSION['personel_adi'] ?? 'Misafir'); ?>&background=3498db&color=fff&rounded=true" width="40" class="me-2">
                 <div>
-                    <strong><?php echo $_SESSION['adsoyad']; ?></strong><br>
-                    <small class="text-info"><?php echo ucfirst($_SESSION['rol']); ?></small>
+                    <strong><?php echo htmlspecialchars($_SESSION['personel_adi'] ?? 'Misafir'); ?></strong><br>
+                    <small class="text-info"><?php echo ucfirst(strtolower($_SESSION['personel_yetki'] ?? 'Personel')); ?></small>
                 </div>
             </div>
             <button type="button" class="btn btn-outline-danger w-100 btn-sm" onclick="logout()">

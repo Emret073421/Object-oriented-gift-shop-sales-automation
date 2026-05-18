@@ -2,7 +2,7 @@
 class Database {
     // 1. Kapsülleme (Private): Bu bilgiler sadece bu sınıfın içinde kalsın, dışarı sızmasın.
     private $host = "localhost";
-    private $dbname = "hediyelik_otomasyon"; // db_market demiştin, kendi db adınla güncelleyebilirsin
+    private $dbname = "db_market"; // SQL dökümündeki veritabanı adı
     private $username = "root";
     private $password = "";
     private $conn;

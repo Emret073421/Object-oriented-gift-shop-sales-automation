@@ -20,6 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         // Giriş Başarılı! Kapsüllenmiş ID'yi session'a güvenle yazıyoruz
         $_SESSION['personel_id'] = $girisDurumu->getId();
         $_SESSION['personel_adi'] = $girisDurumu->getAdSoyad();
+        $_SESSION['personel_yetki'] = $girisDurumu->getYetki();
         $_SESSION['login'] = true;
         // PRG DESENİ: Çift gönderimi engellemek için sayfa güvenle kendine yönlendiriliyor
         header("Location: index.php");
