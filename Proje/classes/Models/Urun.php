@@ -9,6 +9,7 @@ class Urun extends TemelVarlik {
     private $alis_fiyati;
     private $satis_fiyati;
     private $stok_miktari;
+    public $kategori_adi; // PHP 8.2+ dinamik property deprecation uyarısını önlemek için eklendi
 
     // SETTERLAR
     public function setKategoriId($kategori_id)
