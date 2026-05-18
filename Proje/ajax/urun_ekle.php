@@ -14,19 +14,18 @@ if (empty($barkod) || empty($ad) || $alis_fiyati <= 0 || $satis_fiyati <= 0 || $
     exit;
 }
 
-// Barkod kontrolü
-$kontrol = $db->query("SELECT id FROM urunler WHERE barkod = '$barkod' AND durum = 1");
-if ($kontrol && $kontrol->num_rows > 0) {
-    echo json_encode(['basarili' => false, 'mesaj' => 'Bu barkoda sahip aktif bir ürün zaten sistemde mevcut.']);
-    exit;
-}
+// %100 OOP: Değişkenleri doğrudan göndermek yerine Urun model nesnemizi üretiyoruz
+$urun = new Urun();
+$urun->setBarkod($barkod);
+$urun->setAd($ad);
+$urun->setAlisFiyati($alis_fiyati);
+$urun->setSatisFiyati($satis_fiyati);
+$urun->setStokMiktari($stok_miktari);
+$urun->setKategoriId($kategori_id);
 
+// Yönetici (Manager) nesnemizi çağırıp, Model nesnesini (Urun) teslim ediyoruz
 $urunManager = new UrunManager($db);
-$sonuc = $urunManager->urunEkle($barkod, $ad, $alis_fiyati, $satis_fiyati, $stok_miktari, $kategori_id);
+$sonuc = $urunManager->urunEkle($urun);
 
-if ($sonuc) {
-    echo json_encode(['basarili' => true, 'mesaj' => 'Ürün başarıyla eklendi.']);
-} else {
-    echo json_encode(['basarili' => false, 'mesaj' => 'Ürün eklenirken bir veritabanı hatası oluştu.']);
-}
+echo json_encode($sonuc);
 ?>

@@ -1,23 +1,26 @@
 <?php
 class KategoriManager extends TemelManager {
 
-    // Kategori Ekleme
-    public function kategoriEkle($ad, $aciklama)
+    // Kategori Ekleme (OOP Model Nesnesi Alır)
+    public function kategoriEkle(Kategori $kategori)
     {
-        $ad = $this->db->real_escape_string(trim($ad));
-        $aciklama = $this->db->real_escape_string(trim($aciklama));
+        $ad = $this->db->real_escape_string(trim($kategori->getAd()));
+        $aciklama = $this->db->real_escape_string(trim($kategori->getAciklama()));
+
+        // Çakışma kontrolü sınıf içerisine alındı (Encapsulation)
+        $kontrol = $this->db->query("SELECT id FROM kategoriler WHERE ad = '$ad' AND durum = 1");
+        if ($kontrol && $kontrol->num_rows > 0) {
+            return ['basarili' => false, 'mesaj' => 'Bu isimde aktif bir kategori zaten mevcut.'];
+        }
 
         $sql = "INSERT INTO kategoriler (ad, aciklama, durum) VALUES ('$ad', '$aciklama', 1)";
-        $sonuc = $this->db->query($sql);
-
-        if ($sonuc === false) {
-            error_log("Kategori ekleme hatası: " . $this->db->error);
-            return false;
+        if ($this->db->query($sql)) {
+            return ['basarili' => true, 'mesaj' => 'Kategori başarıyla eklendi.'];
         }
-        return true;
+        return ['basarili' => false, 'mesaj' => 'Kategori eklenirken hata oluştu: ' . $this->db->error];
     }
 
-    // Kategorileri Getirme (TemelManager abstract metot implementasyonu)
+    // Kategorileri Getirme
     public function getir($parametre = null)
     {
         $sql = "SELECT * FROM kategoriler WHERE durum = 1 ORDER BY ad ASC";
@@ -38,35 +41,36 @@ class KategoriManager extends TemelManager {
         return $kategoriler;
     }
 
-    // Kategori Güncelleme
-    public function kategoriGuncelle($id, $ad, $aciklama)
+    // Kategori Güncelleme (OOP Model Nesnesi Alır)
+    public function kategoriGuncelle(Kategori $kategori)
     {
-        $id = (int)$id;
-        $ad = $this->db->real_escape_string(trim($ad));
-        $aciklama = $this->db->real_escape_string(trim($aciklama));
+        $id = (int)$kategori->getId();
+        $ad = $this->db->real_escape_string(trim($kategori->getAd()));
+        $aciklama = $this->db->real_escape_string(trim($kategori->getAciklama()));
+
+        // Çakışma kontrolü (Kendi ID'si hariç)
+        $kontrol = $this->db->query("SELECT id FROM kategoriler WHERE ad = '$ad' AND id != $id AND durum = 1");
+        if ($kontrol && $kontrol->num_rows > 0) {
+            return ['basarili' => false, 'mesaj' => 'Bu isimde başka bir aktif kategori zaten mevcut.'];
+        }
 
         $sql = "UPDATE kategoriler SET ad = '$ad', aciklama = '$aciklama' WHERE id = $id";
-        $sonuc = $this->db->query($sql);
-
-        if ($sonuc === false) {
-            error_log("Kategori güncelleme hatası: " . $this->db->error);
-            return false;
+        if ($this->db->query($sql)) {
+            return ['basarili' => true, 'mesaj' => 'Kategori başarıyla güncellendi.'];
         }
-        return true;
+        return ['basarili' => false, 'mesaj' => 'Kategori güncellenirken hata oluştu: ' . $this->db->error];
     }
 
-    // Kategori Silme (TemelManager abstract metot implementasyonu)
+    // Kategori Silme
     public function sil($id = null)
     {
         $id = (int)$id;
         
-        // Kategoriye ait aktif ürün var mı kontrol edelim
         $kontrol = $this->db->query("SELECT id FROM urunler WHERE kategori_id = $id AND durum = 1 LIMIT 1");
         if ($kontrol && $kontrol->num_rows > 0) {
             return ['basarili' => false, 'mesaj' => 'Bu kategoriye ait aktif ürünler bulunmaktadır. Lütfen önce ürünleri başka kategoriye taşıyın veya silin.'];
         }
 
-        // Soft delete (durum = 0)
         $sql = "UPDATE kategoriler SET durum = 0 WHERE id = $id";
         if ($this->db->query($sql)) {
             return ['basarili' => true, 'mesaj' => 'Kategori başarıyla silindi (arşivlendi).'];

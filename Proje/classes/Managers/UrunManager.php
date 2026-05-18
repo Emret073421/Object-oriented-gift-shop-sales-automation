@@ -1,29 +1,32 @@
 <?php 
 class UrunManager extends TemelManager {
 
-    //Abstact metotları implemente ediyoruz.
-
-    //Ürün ekleme
-    public function urunEkle($barkod, $ad, $alis_fiyati, $satis_fiyati, $stok_miktari, $kategori_id = 1)
+    // Ürün ekleme (OOP Model Nesnesi Alır)
+    public function urunEkle(Urun $urun)
     {
-        $barkod = $this->db->real_escape_string($barkod);
-        $ad = $this->db->real_escape_string($ad);
-        $alis_fiyati = (float)$alis_fiyati;
-        $satis_fiyati = (float)$satis_fiyati;
-        $stok_miktari = (int)$stok_miktari;
-        $kategori_id = (int)$kategori_id;
+        $barkod = $this->db->real_escape_string(trim($urun->getBarkod()));
+        $ad = $this->db->real_escape_string(trim($urun->getAd()));
+        $alis_fiyati = (float)$urun->getAlisFiyati();
+        $satis_fiyati = (float)$urun->getSatisFiyati();
+        $stok_miktari = (int)$urun->getStokMiktari();
+        $kategori_id = (int)$urun->getKategoriId();
 
-        $sql = "INSERT INTO urunler (barkod, ad, alis_fiyati, satis_fiyati, stok_miktari, kategori_id, durum) VALUES ('$barkod', '$ad', $alis_fiyati, $satis_fiyati, $stok_miktari, $kategori_id, 1)";
-        $sonuc = $this->db->query($sql);
-
-        if ($sonuc === false) {
-            error_log("Ürün ekleme hatası: " . $this->db->error);
-            return false;
+        // Barkod çakışma kontrolü tamamen Sınıf içerisine alındı (Encapsulation)
+        $kontrol = $this->db->query("SELECT id FROM urunler WHERE barkod = '$barkod' AND durum = 1");
+        if ($kontrol && $kontrol->num_rows > 0) {
+            return ['basarili' => false, 'mesaj' => 'Bu barkoda sahip aktif bir ürün zaten sistemde mevcut.'];
         }
-        return true;
+
+        $sql = "INSERT INTO urunler (barkod, ad, alis_fiyati, satis_fiyati, stok_miktari, kategori_id, durum) 
+                VALUES ('$barkod', '$ad', $alis_fiyati, $satis_fiyati, $stok_miktari, $kategori_id, 1)";
+        
+        if ($this->db->query($sql)) {
+            return ['basarili' => true, 'mesaj' => 'Ürün başarıyla eklendi.'];
+        }
+        return ['basarili' => false, 'mesaj' => 'Ürün eklenirken hata oluştu: ' . $this->db->error];
     }
 
-    //Ürün getirme (TemelManager abstract metot implementasyonu)
+    // Ürün getirme
     public function getir($kategori_id = "tüm", $harf = "")
     {
         $arama_kelimesi = "%" . $harf . "%";
@@ -65,7 +68,6 @@ class UrunManager extends TemelManager {
             $urun->setSatisFiyati($row['satis_fiyati']);
             $urun->setStokMiktari($row['stok_miktari']);
             $urun->setKategoriId($row['kategori_id']);
-            // Ekstra olarak kategori_adi bilgisini dinamik property olarak ekleyebiliriz
             $urun->kategori_adi = $row['kategori_adi'] ?? 'Genel';
             $urunler[] = $urun;
         }
@@ -73,70 +75,59 @@ class UrunManager extends TemelManager {
         return $urunler;
     }
 
-    //Ürün güncelleme
-    public function urunGuncelle($id, $barkod, $ad, $alis_fiyati, $satis_fiyati, $stok_miktari, $kategori_id = 1)
+    // Ürün güncelleme (OOP Model Nesnesi Alır)
+    public function urunGuncelle(Urun $urun)
     {
-        $id = (int)$id;
-        $barkod = $this->db->real_escape_string($barkod);
-        $ad = $this->db->real_escape_string($ad);
-        $alis_fiyati = (float)$alis_fiyati;
-        $satis_fiyati = (float)$satis_fiyati;
-        $stok_miktari = (int)$stok_miktari;
-        $kategori_id = (int)$kategori_id;
+        $id = (int)$urun->getId();
+        $barkod = $this->db->real_escape_string(trim($urun->getBarkod()));
+        $ad = $this->db->real_escape_string(trim($urun->getAd()));
+        $alis_fiyati = (float)$urun->getAlisFiyati();
+        $satis_fiyati = (float)$urun->getSatisFiyati();
+        $stok_miktari = (int)$urun->getStokMiktari();
+        $kategori_id = (int)$urun->getKategoriId();
+
+        // Barkod çakışma kontrolü (Kendi ID'si hariç)
+        $kontrol = $this->db->query("SELECT id FROM urunler WHERE barkod = '$barkod' AND id != $id AND durum = 1");
+        if ($kontrol && $kontrol->num_rows > 0) {
+            return ['basarili' => false, 'mesaj' => 'Bu barkoda sahip başka bir aktif ürün zaten sistemde mevcut.'];
+        }
 
         $sql = "UPDATE urunler SET barkod = '$barkod', ad = '$ad', alis_fiyati = $alis_fiyati, satis_fiyati = $satis_fiyati, stok_miktari = $stok_miktari, kategori_id = $kategori_id WHERE id = $id";
-        $sonuc = $this->db->query($sql);
-
-        if ($sonuc === false) {
-            error_log("Ürün güncelleme hatası: " . $this->db->error);
-            return false;
+        
+        if ($this->db->query($sql)) {
+            return ['basarili' => true, 'mesaj' => 'Ürün başarıyla güncellendi.'];
         }
-        return true;
+        return ['basarili' => false, 'mesaj' => 'Ürün güncellenirken hata oluştu: ' . $this->db->error];
     }
 
-    //Ürün silme (TemelManager abstract metot implementasyonu)
+    // Ürün silme
     public function sil($id = null)
     {
         $id = (int)$id;
-        // Soft delete (durum = 0) yapıyoruz ki geçmiş satış ve iade raporları bozulmasın!
         $sql = "UPDATE urunler SET durum = 0 WHERE id = $id";
-        $sonuc = $this->db->query($sql);
-        if ($sonuc === false) {
-            error_log("Ürün silme hatası: " . $this->db->error);
-            return false;
+        if ($this->db->query($sql)) {
+            return true;
         }
-        return true;
+        error_log("Ürün silme hatası: " . $this->db->error);
+        return false;
     }
 
-    //Stok Ekleme
+    // Stok Ekleme
     public function stokEkle($id, $adet)
     {
-        $id = $this->db->real_escape_string($id);
-        $adet = $this->db->real_escape_string($adet);
+        $id = (int)$id;
+        $adet = (int)$adet;
         $sql = "UPDATE urunler SET stok_miktari = stok_miktari + $adet WHERE id = $id";
-        $sonuc = $this->db->query($sql);
-        if ($sonuc === false) {
-            // Hata durumunda loglama veya hata döndürme
-            error_log("Stok ekleme hatası: " . $this->db->error);
-            return false;
-        }
-        return true;
+        return $this->db->query($sql);
     }
 
-    //Stok çıkarma
+    // Stok çıkarma
     public function stokCikar($id, $adet)
     {
-        $id = $this->db->real_escape_string($id);
-        $adet = $this->db->real_escape_string($adet);
+        $id = (int)$id;
+        $adet = (int)$adet;
         $sql = "UPDATE urunler SET stok_miktari = stok_miktari - $adet WHERE id = $id";
-        $sonuc = $this->db->query($sql);
-        if ($sonuc === false) {
-            // Hata durumunda loglama veya hata döndürme
-            error_log("Stok çıkarma hatası: " . $this->db->error);
-            return false;
-        }
-        return true;
+        return $this->db->query($sql);
     }
-        
 }
 ?>

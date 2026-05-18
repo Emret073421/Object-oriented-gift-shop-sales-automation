@@ -7,23 +7,19 @@ $ad = trim($_POST['ad'] ?? '');
 $aciklama = trim($_POST['aciklama'] ?? '');
 
 if ($id <= 0 || empty($ad)) {
-    echo json_encode(['basarili' => false, 'mesaj' => 'Lütfen kategori adını eksiksiz girin.']);
+    echo json_encode(['basarili' => false, 'mesaj' => 'Lütfen kategori adını girin.']);
     exit;
 }
 
-// Çakışma kontrolü (Kendi ID'si hariç)
-$kontrol = $db->query("SELECT id FROM kategoriler WHERE ad = '$ad' AND id != $id AND durum = 1");
-if ($kontrol && $kontrol->num_rows > 0) {
-    echo json_encode(['basarili' => false, 'mesaj' => 'Bu isimde başka bir aktif kategori zaten mevcut.']);
-    exit;
-}
+// %100 OOP: Kategori model nesnemizi üretip setterlar ile dolduruyoruz
+$kategori = new Kategori();
+$kategori->setId($id);
+$kategori->setAd($ad);
+$kategori->setAciklama($aciklama);
 
+// KategoriManager nesnesini çağırıp, Model nesnemizi teslim ediyoruz
 $kategoriManager = new KategoriManager($db);
-$sonuc = $kategoriManager->kategoriGuncelle($id, $ad, $aciklama);
+$sonuc = $kategoriManager->kategoriGuncelle($kategori);
 
-if ($sonuc) {
-    echo json_encode(['basarili' => true, 'mesaj' => 'Kategori başarıyla güncellendi.']);
-} else {
-    echo json_encode(['basarili' => false, 'mesaj' => 'Kategori güncellenirken veritabanı hatası oluştu.']);
-}
+echo json_encode($sonuc);
 ?>

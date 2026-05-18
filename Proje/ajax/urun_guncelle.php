@@ -15,19 +15,19 @@ if ($id <= 0 || empty($barkod) || empty($ad) || $alis_fiyati <= 0 || $satis_fiya
     exit;
 }
 
-// Barkod çakışma kontrolü (Kendi ID'si hariç)
-$kontrol = $db->query("SELECT id FROM urunler WHERE barkod = '$barkod' AND id != $id AND durum = 1");
-if ($kontrol && $kontrol->num_rows > 0) {
-    echo json_encode(['basarili' => false, 'mesaj' => 'Bu barkoda sahip başka bir aktif ürün zaten sistemde mevcut.']);
-    exit;
-}
+// %100 OOP: Değişkenleri doğrudan göndermek yerine Urun model nesnemizi üretiyoruz
+$urun = new Urun();
+$urun->setId($id);
+$urun->setBarkod($barkod);
+$urun->setAd($ad);
+$urun->setAlisFiyati($alis_fiyati);
+$urun->setSatisFiyati($satis_fiyati);
+$urun->setStokMiktari($stok_miktari);
+$urun->setKategoriId($kategori_id);
 
+// Yönetici (Manager) nesnemizi çağırıp, Model nesnesini (Urun) teslim ediyoruz
 $urunManager = new UrunManager($db);
-$sonuc = $urunManager->urunGuncelle($id, $barkod, $ad, $alis_fiyati, $satis_fiyati, $stok_miktari, $kategori_id);
+$sonuc = $urunManager->urunGuncelle($urun);
 
-if ($sonuc) {
-    echo json_encode(['basarili' => true, 'mesaj' => 'Ürün başarıyla güncellendi.']);
-} else {
-    echo json_encode(['basarili' => false, 'mesaj' => 'Ürün güncellenirken bir veritabanı hatası oluştu.']);
-}
+echo json_encode($sonuc);
 ?>

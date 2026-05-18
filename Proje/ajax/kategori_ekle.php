@@ -10,19 +10,14 @@ if (empty($ad)) {
     exit;
 }
 
-// Çakışma kontrolü
-$kontrol = $db->query("SELECT id FROM kategoriler WHERE ad = '$ad' AND durum = 1");
-if ($kontrol && $kontrol->num_rows > 0) {
-    echo json_encode(['basarili' => false, 'mesaj' => 'Bu isimde aktif bir kategori zaten mevcut.']);
-    exit;
-}
+// %100 OOP: Kategori model nesnemizi üretip setterlar ile dolduruyoruz
+$kategori = new Kategori();
+$kategori->setAd($ad);
+$kategori->setAciklama($aciklama);
 
+// KategoriManager nesnesini çağırıp, Model nesnemizi teslim ediyoruz
 $kategoriManager = new KategoriManager($db);
-$sonuc = $kategoriManager->kategoriEkle($ad, $aciklama);
+$sonuc = $kategoriManager->kategoriEkle($kategori);
 
-if ($sonuc) {
-    echo json_encode(['basarili' => true, 'mesaj' => 'Kategori başarıyla eklendi.']);
-} else {
-    echo json_encode(['basarili' => false, 'mesaj' => 'Kategori eklenirken veritabanı hatası oluştu.']);
-}
+echo json_encode($sonuc);
 ?>
