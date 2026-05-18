@@ -50,6 +50,12 @@ class Personel extends TemelVarlik {
     {
         return $this->yetki;
     }
+
+    // TemelVarlik'tan gelen abstract metodu implemente ediyoruz
+    public function getOzetBilgi(): string
+    {
+        return "Personel: " . $this->ad_soyad . " (@" . $this->kullanici_adi . ")";
+    }
 }
 
 ?>

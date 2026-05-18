@@ -79,5 +79,27 @@ class IslemManager extends TemelManager {
     public function dashboardUrunAdedi(){
         
     }
+
+    // İşlem getirme (TemelManager abstract metot implementasyonu)
+    public function getir($parametre = null)
+    {
+        $sql = "SELECT * FROM islemler";
+        $sonuc = $this->db->query($sql);
+        if ($sonuc === false) return false;
+        $islemler = [];
+        while ($row = $sonuc->fetch_assoc()) {
+            $islemler[] = $row;
+        }
+        return $islemler;
+    }
+
+    // İşlem silme / iptal (TemelManager abstract metot implementasyonu)
+    public function sil($id = null)
+    {
+        if (!$id) return false;
+        $id = $this->db->real_escape_string($id);
+        $sql = "DELETE FROM islemler WHERE id = $id";
+        return $this->db->query($sql);
+    }
 }
 ?>

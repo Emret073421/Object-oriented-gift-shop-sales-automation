@@ -61,5 +61,11 @@ class Urun extends TemelVarlik {
     {
         return $this->stok_miktari;
     }
+
+    // TemelVarlik'tan gelen abstract metodu implemente ediyoruz
+    public function getOzetBilgi(): string
+    {
+        return "Ürün: " . $this->ad . " (Barkod: " . $this->barkod . " - Stok: " . $this->stok_miktari . ")";
+    }
 }
 ?>

@@ -40,5 +40,11 @@ class Kategori extends TemelVarlik {
     } 
     
     // id ve olusturulma_tarihi TemelVarlik'tan otomatik geliyor!
+
+    // TemelVarlik'tan gelen abstract metodu implemente ediyoruz
+    public function getOzetBilgi(): string
+    {
+        return "Kategori: " . $this->ad . " (" . ($this->durum ? "Aktif" : "Pasif") . ")";
+    }
 }
 ?>

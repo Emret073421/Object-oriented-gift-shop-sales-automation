@@ -21,8 +21,8 @@ class PersonelManager extends TemelManager {
         return true;
     }
 
-    //Personel getir
-    public function getir()
+    //Personel getir (TemelManager abstract metot implementasyonu)
+    public function getir($parametre = null)
     {
         
     }
@@ -33,8 +33,8 @@ class PersonelManager extends TemelManager {
         
     }
 
-    //Personel silme
-    public function sil()
+    //Personel silme (TemelManager abstract metot implementasyonu)
+    public function sil($id = null)
     {
         
     }

@@ -23,8 +23,8 @@ class UrunManager extends TemelManager {
         return true;
     }
 
-    //Ürün getirme
-    public function urunleriGetir($kategori_id = "tüm", $harf = "")
+    //Ürün getirme (TemelManager abstract metot implementasyonu)
+    public function getir($kategori_id = "tüm", $harf = "")
     {
         // Arama kelimesinin başına ve sonuna % ekliyoruz (LIKE araması için)
         $arama_kelimesi = "%" . $harf . "%";
@@ -97,8 +97,8 @@ class UrunManager extends TemelManager {
         return true;
     }
 
-    //Ürün silme
-    public function urunSil($id)
+    //Ürün silme (TemelManager abstract metot implementasyonu)
+    public function sil($id = null)
     {
         $id = $this->db->real_escape_string($id);
         $sql = "DELETE FROM urunler WHERE id = $id";

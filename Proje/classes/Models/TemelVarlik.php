@@ -24,5 +24,9 @@ abstract class TemelVarlik {
     {
         $this->olusturulma_tarihi = $olusturulma_tarihi;
     } 
+
+    // Bütün alt varlık sınıflarının (Kategori, Urun, Personel) kendilerine has 
+    // özet bir açıklama dönmesini zorunlu kılan abstract (soyut) metot:
+    abstract public function getOzetBilgi(): string;
 }
 ?>
