@@ -1,13 +1,22 @@
 <?php
 class PersonelManager extends TemelManager {
 
-    // Personel ekleme
-    public function personelEkle($ad, $soyad, $kadi, $sifre, $yetki)
+    // Personel ekleme (OOP Model Nesnesi Alır)
+    public function personelEkle(Personel $personel)
     {
-        $ad = $this->db->real_escape_string(trim($ad));
-        $soyad = $this->db->real_escape_string(trim($soyad));
-        $kadi = $this->db->real_escape_string(trim($kadi));
-        $yetki = $this->db->real_escape_string(trim($yetki));
+        $ad = $this->db->real_escape_string(trim($personel->getAd()));
+        $soyad = $this->db->real_escape_string(trim($personel->getSoyad()));
+        $kadi = $this->db->real_escape_string(trim($personel->getKullaniciAdi()));
+        
+        // Yetki standardizasyonu (YÖNETİCİ -> YONETICI dönüşümü)
+        $hamYetki = mb_strtoupper(trim($personel->getYetki()), 'UTF-8');
+        if ($hamYetki === 'YÖNETİCİ' || $hamYetki === 'YONETICI' || $hamYetki === 'ADMIN') {
+            $yetki = 'YONETICI';
+        } elseif ($hamYetki === 'KASİYER' || $hamYetki === 'KASIYER') {
+            $yetki = 'KASIYER';
+        } else {
+            $yetki = 'PERSONEL';
+        }
 
         // Kullanıcı adı kontrolü
         $sorgu = $this->db->query("SELECT id FROM personeller WHERE kullanici_adi = '$kadi' AND durum = 1");
@@ -16,7 +25,7 @@ class PersonelManager extends TemelManager {
         }
 
         // Şifreyi güvenli hashle
-        $hashliSifre = password_hash($sifre, PASSWORD_DEFAULT);
+        $hashliSifre = password_hash($personel->getSifre(), PASSWORD_DEFAULT);
 
         $sql = "INSERT INTO personeller (ad, soyad, kullanici_adi, sifre, yetki, durum) 
                 VALUES ('$ad', '$soyad', '$kadi', '$hashliSifre', '$yetki', 1)";
@@ -27,7 +36,7 @@ class PersonelManager extends TemelManager {
         return ['basarili' => false, 'mesaj' => 'Personel eklenirken hata oluştu: ' . $this->db->error];
     }
 
-    // Personel getir (TemelManager abstract metot implementasyonu)
+    // Personel getir
     public function getir($parametre = null)
     {
         $sql = "SELECT id, ad, soyad, kullanici_adi, yetki, durum FROM personeller WHERE durum = 1 ORDER BY ad ASC";
@@ -40,14 +49,23 @@ class PersonelManager extends TemelManager {
         return $personeller;
     }
 
-    // Personel güncelleme
-    public function guncelle($id, $ad, $soyad, $kadi, $sifre, $yetki)
+    // Personel güncelleme (OOP Model Nesnesi Alır)
+    public function guncelle(Personel $personel)
     {
-        $id = (int)$id;
-        $ad = $this->db->real_escape_string(trim($ad));
-        $soyad = $this->db->real_escape_string(trim($soyad));
-        $kadi = $this->db->real_escape_string(trim($kadi));
-        $yetki = $this->db->real_escape_string(trim($yetki));
+        $id = (int)$personel->getId();
+        $ad = $this->db->real_escape_string(trim($personel->getAd()));
+        $soyad = $this->db->real_escape_string(trim($personel->getSoyad()));
+        $kadi = $this->db->real_escape_string(trim($personel->getKullaniciAdi()));
+        
+        // Yetki standardizasyonu (YÖNETİCİ -> YONETICI dönüşümü)
+        $hamYetki = mb_strtoupper(trim($personel->getYetki()), 'UTF-8');
+        if ($hamYetki === 'YÖNETİCİ' || $hamYetki === 'YONETICI' || $hamYetki === 'ADMIN') {
+            $yetki = 'YONETICI';
+        } elseif ($hamYetki === 'KASİYER' || $hamYetki === 'KASIYER') {
+            $yetki = 'KASIYER';
+        } else {
+            $yetki = 'PERSONEL';
+        }
 
         // Kullanıcı adı çakışma kontrolü
         $sorgu = $this->db->query("SELECT id FROM personeller WHERE kullanici_adi = '$kadi' AND id != $id AND durum = 1");
@@ -56,8 +74,8 @@ class PersonelManager extends TemelManager {
         }
 
         $sifreEk = "";
-        if (!empty($sifre)) {
-            $hashliSifre = password_hash($sifre, PASSWORD_DEFAULT);
+        if (!empty($personel->getSifre())) {
+            $hashliSifre = password_hash($personel->getSifre(), PASSWORD_DEFAULT);
             $sifreEk = ", sifre = '$hashliSifre'";
         }
 
@@ -69,13 +87,12 @@ class PersonelManager extends TemelManager {
         return ['basarili' => false, 'mesaj' => 'Güncelleme hatası: ' . $this->db->error];
     }
 
-    // Personel silme (TemelManager abstract metot implementasyonu)
+    // Personel silme
     public function sil($id = null)
     {
         $id = (int)$id;
         if ($id <= 0) return ['basarili' => false, 'mesaj' => 'Geçersiz personel ID.'];
 
-        // Kendi kendini silmeyi engellemek isterseniz session kontrolü yapılabilir
         if (isset($_SESSION['personel_id']) && $_SESSION['personel_id'] == $id) {
             return ['basarili' => false, 'mesaj' => 'Kendi oturumunuzu silemezsiniz!'];
         }

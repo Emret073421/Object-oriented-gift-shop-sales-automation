@@ -13,8 +13,17 @@ if (empty($ad) || empty($soyad) || empty($kadi) || empty($sifre)) {
     exit;
 }
 
+// %100 OOP: Personel model nesnemizi üretip setterlar ile dolduruyoruz
+$personel = new Personel();
+$personel->setAd($ad);
+$personel->setSoyad($soyad);
+$personel->setKullaniciAdi($kadi);
+$personel->setSifre($sifre);
+$personel->setYetki($yetki);
+
+// PersonelManager nesnesini çağırıp, Model nesnemizi teslim ediyoruz
 $personelManager = new PersonelManager($db);
-$sonuc = $personelManager->personelEkle($ad, $soyad, $kadi, $sifre, $yetki);
+$sonuc = $personelManager->personelEkle($personel);
 
 echo json_encode($sonuc);
 ?>

@@ -57,7 +57,7 @@ $page_title = 'Personel ve Kasiyer Yönetimi';
                         <select id="ekleYetki" class="form-select py-2 shadow-sm">
                             <option value="KASIYER">Kasiyer</option>
                             <option value="PERSONEL">Standart Personel</option>
-                            <option value="YÖNETİCİ">Yönetici</option>
+                            <option value="YONETICI">Yönetici</option>
                         </select>
                     </div>
                     <button type="submit" class="btn btn-primary w-100 py-2 fw-bold shadow-sm">
@@ -148,7 +148,7 @@ function personelDuzenlePenceresi(p) {
                 <select id="duzenleYetki" class="form-select py-2">
                     <option value="KASIYER" ${p.yetki === 'KASIYER' ? 'selected' : ''}>Kasiyer</option>
                     <option value="PERSONEL" ${p.yetki === 'PERSONEL' ? 'selected' : ''}>Standart Personel</option>
-                    <option value="YÖNETİCİ" ${p.yetki === 'YÖNETİCİ' || p.yetki === 'YONETICI' ? 'selected' : ''}>Yönetici</option>
+                    <option value="YONETICI" ${p.yetki === 'YONETICI' || p.yetki === 'YÖNETİCİ' ? 'selected' : ''}>Yönetici</option>
                 </select>
             </div>
         `,
