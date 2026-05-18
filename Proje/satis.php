@@ -282,6 +282,8 @@ $page_title = 'Hızlı Satış Ekranı (POS)';
                     updateSalesCartUI();
                 }
             });
+        } else {
+            Swal.fire('Sepet Zaten Boş', 'Temizlenecek ürün bulunamadı.', 'info');
         }
     }
 
@@ -315,14 +317,15 @@ $page_title = 'Hızlı Satış Ekranı (POS)';
         
         let totalItems = 0;
         let totalPrice = 0;
-
         let itemsHTML = '';
 
         if (salesCart.length === 0) {
-            emptyMsg.style.display = 'flex';
+            emptyMsg.classList.remove('d-none');
+            emptyMsg.classList.add('d-flex');
             itemsContainer.innerHTML = '';
         } else {
-            emptyMsg.style.display = 'none';
+            emptyMsg.classList.remove('d-flex');
+            emptyMsg.classList.add('d-none');
             
             salesCart.forEach(item => {
                 let itemTotal = item.fiyat * item.miktar;
@@ -330,19 +333,21 @@ $page_title = 'Hızlı Satış Ekranı (POS)';
                 totalPrice += itemTotal;
 
                 itemsHTML += `
-                <div class="d-flex justify-content-between align-items-center bg-dark p-3 rounded mb-2 border border-secondary shadow-sm">
-                    <div class="flex-grow-1 me-2">
-                        <div class="text-white fw-bold fs-6">${item.ad}</div>
-                        <small class="text-muted">₺${item.fiyat.toFixed(2)} Birim Fiyat</small>
+                <div class="bg-dark p-2 rounded mb-2 border border-secondary shadow-sm">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <div class="text-white fw-bold text-truncate pe-2" style="font-size: 0.95rem; max-width: 75%;">${item.ad}</div>
+                        <button class="btn btn-sm btn-link text-danger p-0 border-0" onclick="removeSaleItem(${item.id})" title="Kaldır"><i class="fa-solid fa-trash-can fs-6"></i></button>
                     </div>
-                    <div class="d-flex align-items-center me-3">
-                        <button class="btn btn-sm btn-outline-secondary px-2 py-1 text-white" onclick="miktarDegistir(${item.id}, ${item.miktar - 1})"><i class="fa-solid fa-minus"></i></button>
-                        <input type="number" class="form-control form-control-sm text-center mx-1 bg-light fw-bold" style="width: 65px;" value="${item.miktar}" min="1" max="${item.stok}" onchange="miktarDegistir(${item.id}, this.value)">
-                        <button class="btn btn-sm btn-outline-secondary px-2 py-1 text-white" onclick="miktarDegistir(${item.id}, ${item.miktar + 1})"><i class="fa-solid fa-plus"></i></button>
-                    </div>
-                    <div class="d-flex align-items-center">
-                        <h6 class="text-success mb-0 me-3 fw-bold" style="width: 80px; text-align: right;">₺${itemTotal.toFixed(2)}</h6>
-                        <button class="btn btn-sm btn-danger rounded-circle" onclick="removeSaleItem(${item.id})"><i class="fa-solid fa-xmark"></i></button>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="text-muted small">₺${item.fiyat.toFixed(2)} / adet</div>
+                        <div class="d-flex align-items-center">
+                            <div class="input-group input-group-sm me-2" style="width: 90px;">
+                                <button class="btn btn-outline-secondary text-white px-2 py-0" type="button" onclick="miktarDegistir(${item.id}, ${item.miktar - 1})"><i class="fa-solid fa-minus" style="font-size: 0.75rem;"></i></button>
+                                <input type="number" class="form-control text-center bg-light fw-bold px-1 py-0" value="${item.miktar}" min="1" max="${item.stok}" onchange="miktarDegistir(${item.id}, this.value)">
+                                <button class="btn btn-outline-secondary text-white px-2 py-0" type="button" onclick="miktarDegistir(${item.id}, ${item.miktar + 1})"><i class="fa-solid fa-plus" style="font-size: 0.75rem;"></i></button>
+                            </div>
+                            <div class="text-success fw-bold text-end" style="font-size: 1.05rem; min-width: 75px;">₺${itemTotal.toFixed(2)}</div>
+                        </div>
                     </div>
                 </div>`;
             });
