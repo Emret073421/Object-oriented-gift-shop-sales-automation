@@ -36,6 +36,7 @@ $page_title = 'Finans ve Detaylı Raporlar';
     .icon-box.blue { background-color: #eff6ff; color: #3b82f6; }
     .icon-box.yellow { background-color: #fefce8; color: #eab308; }
     .icon-box.green { background-color: #f0fdf4; color: #22c55e; }
+    .icon-box.red { background-color: #fef2f2; color: #ef4444; }
     
     .table-header {
         font-size: 0.75rem;
@@ -58,7 +59,7 @@ $page_title = 'Finans ve Detaylı Raporlar';
             </button>
         </div>
         <div class="text-muted small mt-2 mt-md-0">
-            <i class="fa-solid fa-circle-info me-1 text-primary"></i> Satışlar ve İadeler net ciroya otomatik yansıtılmaktadır.
+            <i class="fa-solid fa-circle-info me-1 text-primary"></i> Satışlar, İadeler ve Mal Alışları net kazanca otomatik yansıtılmaktadır.
         </div>
     </div>
 </div>
@@ -94,7 +95,10 @@ $page_title = 'Finans ve Detaylı Raporlar';
                         <option value="2027">2027</option>
                     </select>
                 </div>
-                <div class="col-md-6 text-md-end mt-4 mt-md-0">
+                <div class="col-md-6 text-md-end mt-4 mt-md-0 d-flex justify-content-md-end align-items-center gap-3">
+                    <div class="text-muted small">
+                        <span class="badge bg-light text-dark border me-1" id="aylikEkBanka">Satılan: 0 Adet | Sipariş: 0</span>
+                    </div>
                     <button class="btn btn-primary px-4 py-2 fw-bold shadow-sm" onclick="fetchAylikVeri()">
                         <i class="fa-solid fa-rotate me-2"></i> Verileri Yenile
                     </button>
@@ -105,35 +109,46 @@ $page_title = 'Finans ve Detaylı Raporlar';
 
     <!-- İstatistik Kartları -->
     <div class="row g-4 mb-4">
-        <div class="col-md-4">
-            <div class="card report-card h-100 bg-white border-0 border-start border-4 border-primary shadow-sm">
-                <div class="card-body p-4 d-flex align-items-center">
-                    <div class="icon-box blue me-4"><i class="fa-solid fa-wallet"></i></div>
-                    <div>
-                        <div class="text-muted small fw-bold mb-1" id="aylikCiroBaslik">MAYIS AYI NET CİRO</div>
-                        <h3 class="fw-bold mb-0 text-dark" id="aylikCiroDeger">0,00 ₺</h3>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card report-card h-100 bg-white border-0 border-start border-4 border-warning shadow-sm">
-                <div class="card-body p-4 d-flex align-items-center">
-                    <div class="icon-box yellow me-4"><i class="fa-solid fa-box"></i></div>
-                    <div>
-                        <div class="text-muted small fw-bold mb-1" id="aylikUrunBaslik">MAYIS AYI SATILAN ÜRÜN</div>
-                        <h3 class="fw-bold mb-0 text-dark" id="aylikUrunDeger">0 Adet</h3>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
+        <div class="col-md-3">
             <div class="card report-card h-100 bg-white border-0 border-start border-4 border-success shadow-sm">
                 <div class="card-body p-4 d-flex align-items-center">
-                    <div class="icon-box green me-4"><i class="fa-solid fa-cart-shopping"></i></div>
+                    <div class="icon-box green me-3"><i class="fa-solid fa-hand-holding-dollar"></i></div>
                     <div>
-                        <div class="text-muted small fw-bold mb-1">TAMAMLANAN SİPARİŞ</div>
-                        <h3 class="fw-bold mb-0 text-dark" id="aylikSiparisDeger">0 Adet</h3>
+                        <div class="text-muted small fw-bold mb-1" id="aylikSatisBaslik">TOPLAM SATIŞ (GELİR)</div>
+                        <h4 class="fw-bold mb-0 text-success" id="aylikSatisDeger">0,00 ₺</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card report-card h-100 bg-white border-0 border-start border-4 border-danger shadow-sm">
+                <div class="card-body p-4 d-flex align-items-center">
+                    <div class="icon-box red me-3"><i class="fa-solid fa-arrow-rotate-left"></i></div>
+                    <div>
+                        <div class="text-muted small fw-bold mb-1">MÜŞTERİ İADELERİ (GİDER)</div>
+                        <h4 class="fw-bold mb-0 text-danger" id="aylikIadeDeger">0,00 ₺</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card report-card h-100 bg-white border-0 border-start border-4 border-warning shadow-sm">
+                <div class="card-body p-4 d-flex align-items-center">
+                    <div class="icon-box yellow me-3"><i class="fa-solid fa-boxes-packing"></i></div>
+                    <div>
+                        <div class="text-muted small fw-bold mb-1">MAL ALIŞ (TEDARİK GİDERİ)</div>
+                        <h4 class="fw-bold mb-0 text-warning text-dark" id="aylikAlisDeger">0,00 ₺</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card report-card h-100 bg-white border-0 border-start border-4 border-primary shadow-sm">
+                <div class="card-body p-4 d-flex align-items-center">
+                    <div class="icon-box blue me-3"><i class="fa-solid fa-wallet"></i></div>
+                    <div>
+                        <div class="text-muted small fw-bold mb-1" id="aylikNetBaslik">NET KAZANÇ</div>
+                        <h4 class="fw-bold mb-0 text-primary" id="aylikNetDeger">0,00 ₺</h4>
                     </div>
                 </div>
             </div>
@@ -143,7 +158,7 @@ $page_title = 'Finans ve Detaylı Raporlar';
     <!-- Satış Özeti Tablosu -->
     <div class="card report-card bg-white border-0 shadow-sm">
         <div class="card-body p-4">
-            <h5 class="fw-bold text-dark mb-4" id="aylikTabloBaslik"><i class="fa-solid fa-list-check text-primary me-2"></i> Mayıs Ayı Satış ve İade Özeti</h5>
+            <h5 class="fw-bold text-dark mb-4" id="aylikTabloBaslik"><i class="fa-solid fa-list-check text-primary me-2"></i> Finansal Hareket Özeti</h5>
             <div class="table-responsive" style="max-height: 450px; overflow-y: auto;">
                 <table class="table table-hover align-middle mb-0">
                     <thead class="table-light sticky-top">
@@ -191,24 +206,46 @@ $page_title = 'Finans ve Detaylı Raporlar';
 
     <!-- İstatistik Kartları -->
     <div class="row g-4 mb-4">
-        <div class="col-md-6">
-            <div class="card report-card h-100 bg-white border-0 border-start border-4 border-primary shadow-sm">
+        <div class="col-md-3">
+            <div class="card report-card h-100 bg-white border-0 border-start border-4 border-success shadow-sm">
                 <div class="card-body p-4 d-flex align-items-center">
-                    <div class="icon-box blue me-4"><i class="fa-solid fa-chart-line"></i></div>
+                    <div class="icon-box green me-3"><i class="fa-solid fa-chart-line"></i></div>
                     <div>
-                        <div class="text-muted small fw-bold mb-1">YILLIK NET HASILAT (SATIS - IADE)</div>
-                        <h2 class="fw-bold mb-0 text-primary" id="yillikCiroDeger">0,00 ₺</h2>
+                        <div class="text-muted small fw-bold mb-1">YILLIK BRÜT SATIŞ</div>
+                        <h4 class="fw-bold mb-0 text-success" id="yillikSatisDeger">0,00 ₺</h4>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-6">
+        <div class="col-md-3">
             <div class="card report-card h-100 bg-white border-0 border-start border-4 border-warning shadow-sm">
                 <div class="card-body p-4 d-flex align-items-center">
-                    <div class="icon-box yellow me-4"><i class="fa-solid fa-award"></i></div>
+                    <div class="icon-box yellow me-3"><i class="fa-solid fa-file-invoice-dollar"></i></div>
                     <div>
-                        <div class="text-muted small fw-bold mb-1">YILIN EN ÇOK SATILAN ÜRÜNÜ</div>
-                        <h5 class="fw-bold mb-0 text-dark" id="yillikEnCokSatan">Yükleniyor...</h5>
+                        <div class="text-muted small fw-bold mb-1">YILLIK GİDER (İADE & ALIŞ)</div>
+                        <div class="fw-bold text-dark small" id="yillikGiderDeger">İade: 0 ₺ | Alış: 0 ₺</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card report-card h-100 bg-white border-0 border-start border-4 border-primary shadow-sm">
+                <div class="card-body p-4 d-flex align-items-center">
+                    <div class="icon-box blue me-3"><i class="fa-solid fa-vault"></i></div>
+                    <div>
+                        <div class="text-muted small fw-bold mb-1">YILLIK NET KAZANÇ</div>
+                        <h4 class="fw-bold mb-0 text-primary" id="yillikNetDeger">0,00 ₺</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card report-card h-100 bg-white border-0 border-start border-4 border-info shadow-sm">
+                <div class="card-body p-4 d-flex align-items-center">
+                    <div class="icon-box blue me-3"><i class="fa-solid fa-award"></i></div>
+                    <div>
+                        <div class="text-muted small fw-bold mb-1">YILIN EN ÇOK SATANI</div>
+                        <div class="fw-bold text-dark small" id="yillikEnCokSatan">Yükleniyor...</div>
                     </div>
                 </div>
             </div>
@@ -218,20 +255,23 @@ $page_title = 'Finans ve Detaylı Raporlar';
     <!-- Aylık Ciro Dağılımı Tablosu -->
     <div class="card report-card bg-white border-0 shadow-sm">
         <div class="card-body p-4">
-            <h5 class="fw-bold text-dark mb-4" id="yillikTabloBaslik"><i class="fa-solid fa-calendar-grid-58 text-success me-2"></i> 2026 Yılı Aylık Hasılat Dağılımı</h5>
+            <h5 class="fw-bold text-dark mb-4" id="yillikTabloBaslik"><i class="fa-solid fa-calendar-grid-58 text-success me-2"></i> Yıllık Finansal Dağılım Tablosu</h5>
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0">
                     <thead class="table-light">
                         <tr>
                             <th class="table-header border-0 ps-4">AY</th>
-                            <th class="table-header border-0 text-center">TAMAMLANAN SİPARİŞ</th>
-                            <th class="table-header border-0 text-center">SATILAN ÜRÜN (ADET)</th>
-                            <th class="table-header border-0 text-end pe-4">NET AYLIK CİRO</th>
+                            <th class="table-header border-0 text-center">SİPARİŞ</th>
+                            <th class="table-header border-0 text-center">SATILAN ADET</th>
+                            <th class="table-header border-0 text-end">SATIŞ (₺)</th>
+                            <th class="table-header border-0 text-end">İADE (₺)</th>
+                            <th class="table-header border-0 text-end">MAL ALIŞ (₺)</th>
+                            <th class="table-header border-0 text-end pe-4">NET KAZANÇ</th>
                         </tr>
                     </thead>
                     <tbody id="yillikTabloGovde">
                         <tr>
-                            <td colspan="4" class="text-center py-5 text-muted">Yükleniyor...</td>
+                            <td colspan="7" class="text-center py-5 text-muted">Yükleniyor...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -242,13 +282,11 @@ $page_title = 'Finans ve Detaylı Raporlar';
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-    // Sayfa açıldığında şu anki ayı seçili yapalım
     let currentMonth = new Date().getMonth() + 1;
     document.getElementById('aySecimi').value = currentMonth;
     fetchAylikVeri();
 });
 
-// 1. Görünüm Değiştirme (Aylık / Yıllık)
 function switchView(viewName) {
     document.getElementById('btnAylik').classList.remove('active');
     document.getElementById('btnYillik').classList.remove('active');
@@ -267,16 +305,15 @@ function switchView(viewName) {
     }
 }
 
-// 2. Aylık Verileri Çekme
 function fetchAylikVeri() {
     let aySelect = document.getElementById('aySecimi');
     let ayAdi = aySelect.options[aySelect.selectedIndex].text;
     let yil = document.getElementById('yilSecimiAylik').value;
     let ayKodu = aySelect.value;
 
-    document.getElementById('aylikCiroBaslik').innerText = `${ayAdi.toUpperCase()} AYI NET CİRO`;
-    document.getElementById('aylikUrunBaslik').innerText = `${ayAdi.toUpperCase()} AYI SATILAN ÜRÜN`;
-    document.getElementById('aylikTabloBaslik').innerHTML = `<i class="fa-solid fa-list-check text-primary me-2"></i> ${ayAdi} Ayı Satış ve İade Özeti`;
+    document.getElementById('aylikSatisBaslik').innerText = `${ayAdi.toUpperCase()} AYI TOPLAM SATIŞ`;
+    document.getElementById('aylikNetBaslik').innerText = `${ayAdi.toUpperCase()} AYI NET KAZANÇ`;
+    document.getElementById('aylikTabloBaslik').innerHTML = `<i class="fa-solid fa-list-check text-primary me-2"></i> ${ayAdi} Ayı Finansal Hareket Özeti`;
 
     let formData = new FormData();
     formData.append('ay', ayKodu);
@@ -289,9 +326,11 @@ function fetchAylikVeri() {
     .then(response => response.json())
     .then(data => {
         if (data.basarili) {
-            document.getElementById('aylikCiroDeger').innerText = data.net_ciro;
-            document.getElementById('aylikUrunDeger').innerText = data.satilan_adet;
-            document.getElementById('aylikSiparisDeger').innerText = data.siparis_adet;
+            document.getElementById('aylikSatisDeger').innerText = data.satis_toplam;
+            document.getElementById('aylikIadeDeger').innerText = data.iade_toplam;
+            document.getElementById('aylikAlisDeger').innerText = data.alis_toplam;
+            document.getElementById('aylikNetDeger').innerText = data.net_kazanc;
+            document.getElementById('aylikEkBanka').innerText = `Satılan: ${data.satilan_adet} | Sipariş: ${data.siparis_adet}`;
             document.getElementById('aylikTabloGovde').innerHTML = data.tablo_html;
         } else {
             Swal.fire('Hata!', data.mesaj, 'error');
@@ -300,11 +339,10 @@ function fetchAylikVeri() {
     .catch(error => console.error("Aylık rapor hatası:", error));
 }
 
-// 3. Yıllık Verileri Çekme
 function fetchYillikVeri() {
     let yil = document.getElementById('yilSecimiYillik').value;
 
-    document.getElementById('yillikTabloBaslik').innerHTML = `<i class="fa-solid fa-calendar-grid-58 text-success me-2"></i> ${yil} Yılı Aylık Hasılat Dağılımı`;
+    document.getElementById('yillikTabloBaslik').innerHTML = `<i class="fa-solid fa-calendar-grid-58 text-success me-2"></i> ${yil} Yılı Finansal Dağılım Tablosu`;
 
     let formData = new FormData();
     formData.append('yil', yil);
@@ -316,7 +354,9 @@ function fetchYillikVeri() {
     .then(response => response.json())
     .then(data => {
         if (data.basarili) {
-            document.getElementById('yillikCiroDeger').innerText = data.yillik_ciro;
+            document.getElementById('yillikSatisDeger').innerText = data.yillik_satis;
+            document.getElementById('yillikGiderDeger').innerText = `İade: ${data.yillik_iade} | Alış: ${data.yillik_alis}`;
+            document.getElementById('yillikNetDeger').innerText = data.yillik_net;
             document.getElementById('yillikEnCokSatan').innerText = data.en_cok_satan;
             document.getElementById('yillikTabloGovde').innerHTML = data.tablo_html;
         } else {
