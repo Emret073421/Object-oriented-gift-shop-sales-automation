@@ -1,19 +1,22 @@
 <?php 
 $page_title = 'Hızlı Satış Ekranı (POS)';
-// header is now included in index.php
 ?>
+<!-- jQuery ve SweetAlert2 CDN -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <style>
     /* Sadece bu sayfaya özel Koyu Tema (POS Ekranı Tasarımı) */
     .pos-container {
-        background-color: transparent; /* Arka planı genel temayla uyumlu (şeffaf/açık gri) yaptık */
+        background-color: transparent;
         border-radius: 12px;
-        color: #1e293b; /* Başlıklar ve yazılar için koyu renk */
+        color: #1e293b;
         min-height: 80vh;
         padding: 0;
         font-family: 'Segoe UI', sans-serif;
     }
     .pos-card {
-        background-color: #1e293b; /* Kart arka planı */
+        background-color: #1e293b;
         border: 1px solid #334155;
         border-radius: 12px;
     }
@@ -30,11 +33,11 @@ $page_title = 'Hızlı Satış Ekranı (POS)';
         box-shadow: 0 4px 12px rgba(0,0,0,0.2);
     }
     .pos-product-card.selected {
-        border: 2px solid #0ea5e9; /* Seçili üründe mavi çerçeve */
+        border: 2px solid #0ea5e9;
         background-color: #1e293b;
     }
     .pos-price {
-        color: #10b981; /* Açık yeşil fiyat */
+        color: #10b981;
         font-weight: 800;
         font-size: 1.3rem;
     }
@@ -88,7 +91,7 @@ $page_title = 'Hızlı Satış Ekranı (POS)';
         margin-top: auto;
     }
     .btn-complete {
-        background-color: #047857; /* Koyu yeşil buton */
+        background-color: #047857;
         color: white;
         font-weight: 700;
         border: none;
@@ -109,20 +112,10 @@ $page_title = 'Hızlı Satış Ekranı (POS)';
         border-color: #0ea5e9;
         box-shadow: none;
     }
-    /* Scrollbar tasarımı */
-    ::-webkit-scrollbar {
-        width: 8px;
-    }
-    ::-webkit-scrollbar-track {
-        background: #0f172a; 
-    }
-    ::-webkit-scrollbar-thumb {
-        background: #334155; 
-        border-radius: 4px;
-    }
-    ::-webkit-scrollbar-thumb:hover {
-        background: #475569; 
-    }
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: #0f172a; }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #475569; }
 </style>
 
 <div class="pos-container">
@@ -133,25 +126,23 @@ $page_title = 'Hızlı Satış Ekranı (POS)';
             <!-- Başlık ve Rozet -->
             <div class="d-flex justify-content-between align-items-center mb-4 mt-2">
                 <h4 class="mb-0 fw-bold text-dark"><i class="fa-solid fa-box text-primary me-2"></i> Ürün Kataloğu</h4>
-                <!-- Stoktaki ürün sayısını göster -->
-                <span class="badge bg-primary rounded-pill px-3 py-2" style="font-size: 0.9rem;">10 ürün</span>
+                <span class="badge bg-primary rounded-pill px-3 py-2" id="katalogUrunSayisi" style="font-size: 0.9rem;">Yükleniyor...</span>
             </div>
 
             <!-- Arama Çubuğu -->
             <div class="mb-4 position-relative">
                 <i class="fa-solid fa-magnifying-glass position-absolute text-muted" style="left: 15px; top: 12px; font-size: 1.2rem;"></i>
-                <input type="text" class="form-control pos-search ps-5 py-2 shadow-sm" placeholder="Ürün adı, barkod veya kategori ile ara..." onkeyup="urunAra(this.value)">
+                <input type="text" id="aramaGirdisi" class="form-control pos-search ps-5 py-2 shadow-sm" placeholder="Ürün adı, barkod veya kategori ile ara..." onkeyup="urunAra()">
             </div>
 
             <!-- Kategori Combobox -->
             <div class="mb-4">
-                <select class="form-select pos-search py-2 shadow-sm" onchange="filtreliUrunGetir(this.value)" style="border-radius: 8px; font-size: 1.1rem;">
-                    <option value="tumu">Tümü</option>
+                <select id="kategoriSecimi" class="form-select pos-search py-2 shadow-sm" onchange="urunAra()" style="border-radius: 8px; font-size: 1.1rem;">
+                    <option value="tumu">Tüm Kategoriler</option>
                     <?php
-                    // Kategorileri veritabanından çekiyoruz
                     $kategoriSorgu = $db->query("SELECT * FROM kategoriler WHERE durum = 1 ORDER BY ad ASC");
-                    if($kategoriSorgu && $kategoriSorgu->num_rows > 0){
-                        while($kat = $kategoriSorgu->fetch_assoc()){
+                    if ($kategoriSorgu && $kategoriSorgu->num_rows > 0) {
+                        while ($kat = $kategoriSorgu->fetch_assoc()) {
                             echo '<option value="' . $kat['id'] . '">' . htmlspecialchars($kat['ad']) . '</option>';
                         }
                     }
@@ -160,21 +151,8 @@ $page_title = 'Hızlı Satış Ekranı (POS)';
             </div>
 
             <!-- Ürün Grid Alanı (Dikey Scroll) -->
-            <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-3 overflow-y-auto overflow-x-hidden pe-2 pb-3" style="max-height: 55vh;">
-
-                <!-- Ürün 6 -->
-                <div class="col">
-                    <div class="pos-product-card p-3 h-100 d-flex flex-column">
-                        <h6 class="fw-bold mb-1 text-white">Doğal Taşlı Otantik Kolye</h6>
-                        <small class="text-muted d-block mb-3" style="font-size: 0.75rem; letter-spacing: 1px;">869000000010</small>
-                        <small class="d-block mb-auto text-secondary">Takılar</small>
-                        <div class="mt-3">
-                            <div class="pos-price mb-1">₺95.00</div>
-                            <div class="pos-stock"><i class="fa-solid fa-check me-1"></i> 60 adet</div>
-                        </div>
-                    </div>
-                </div>
-
+            <div id="urun_listesi" class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-3 overflow-y-auto overflow-x-hidden pe-2 pb-3" style="max-height: 55vh;">
+                <div class="col-12 py-4 text-center text-muted">Ürünler yükleniyor...</div>
             </div>
         </div>
 
@@ -184,33 +162,17 @@ $page_title = 'Hızlı Satış Ekranı (POS)';
                 
                 <!-- Sepet Başlık -->
                 <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h5 class="mb-0 fw-bold"><i class="fa-solid fa-basket-shopping text-warning me-2"></i> Satış Sepeti</h5>
+                    <h5 class="mb-0 fw-bold text-white"><i class="fa-solid fa-basket-shopping text-warning me-2"></i> Satış Sepeti</h5>
                     <button class="btn btn-sm btn-outline-danger border-0 text-danger" style="background: rgba(220, 53, 69, 0.1);" onclick="clearSalesCart()"><i class="fa-solid fa-trash-can me-1"></i> Temizle</button>
                 </div>
 
-                <!-- Müşteri Seçimi Kaldırıldı -->
-
                 <!-- Sepet İçi (JS ile Liste Buraya Gelecek) -->
                 <div id="salesCartContainer" class="flex-grow-1 d-flex flex-column mb-4 overflow-y-auto pe-2" style="max-height: 40vh;">
-                    <!-- Boş Durum Gösterimi -->
                     <div id="emptyCartMessage" class="d-flex flex-column align-items-center justify-content-center h-100 p-4" style="border: 2px dashed #334155; border-radius: 12px; background-color: rgba(30, 41, 59, 0.5);">
                         <i class="fa-solid fa-cart-arrow-down fa-3x mb-3 text-secondary"></i>
                         <h6 class="text-white mb-1">Sepet boş</h6>
-                        <small class="text-muted">Soldaki katalogdan ürün ekleyin</small>
+                        <small class="text-muted">Soldaki katalog/listeden ürün ekleyin</small>
                     </div>
-                    
-                    <!-- JS ile buraya sepet öğeleri eklenecek, örnek HTML yapısı:
-                    <div class="d-flex justify-content-between align-items-center bg-dark p-2 rounded mb-2 border border-secondary">
-                        <div>
-                            <div class="text-white fw-bold">Ürün Adı</div>
-                            <small class="text-muted">₺Fiyat x Adet</small>
-                        </div>
-                        <div class="d-flex align-items-center">
-                            <h6 class="text-success mb-0 me-3">₺Toplam</h6>
-                            <button class="btn btn-sm btn-danger" onclick="removeSaleItem(1)"><i class="fa-solid fa-xmark"></i></button>
-                        </div>
-                    </div>
-                    -->
                 </div>
 
                 <!-- Sepet Alt Özet ve Tamamlama Alanı -->
@@ -244,60 +206,81 @@ $page_title = 'Hızlı Satış Ekranı (POS)';
 </div>
 
 <script>
-
-    function urunAra(arama){
-        
-    }
-
-    function filtreliUrunGetir(kategori){
-        
-    }
-
-    function urunGetir(arama) {
-        $.ajax({
-            url: "ajax/urun_getir.php",
-            type: "POST",
-            data: { arama: arama },
-            success: function(response) {
-                $("#urun_listesi").html(response);
-            }
-        });
-    }
-    /* =========================================================================
-       SATIŞ (POS) SEPETİ - JAVASCRIPT İSKELETİ
-       Aşağıdaki fonksiyonların içini satış (satis.php) mantığına göre doldurabilirsin.
-    ========================================================================= */
-    
     let salesCart = [];
 
-    // 1. Ürünü Sepete Ekleme (Sol taraftaki ürün kartlarına tıklanınca çalışmalı)
-    // Ürün kartlarındaki <div> etiketine onclick="addSaleItem({id: 1, name: 'Kupa', price: 50.00})" ekleyebilirsin.
+    // Sayfa yüklendiğinde ürünleri getir
+    document.addEventListener("DOMContentLoaded", function() {
+        urunAra();
+    });
+
+    // Ürünleri AJAX ile getirme ve filtreleme
+    function urunAra() {
+        let arama = document.getElementById('aramaGirdisi').value;
+        let kategori = document.getElementById('kategoriSecimi').value;
+
+        let formData = new FormData();
+        formData.append('arama', arama);
+        formData.append('kategori', kategori);
+
+        fetch("ajax/urun_getir.php", {
+            method: "POST",
+            body: formData
+        })
+        .then(response => response.text())
+        .then(data => {
+            document.getElementById('urun_listesi').innerHTML = data;
+            // Katalogdaki ürün sayısını güncelle
+            let urunKartlari = document.getElementById('urun_listesi').getElementsByClassName('pos-product-card').length;
+            document.getElementById('katalogUrunSayisi').innerText = urunKartlari + " ürün";
+        })
+        .catch(error => console.error("Ürün getirme hatası:", error));
+    }
+
+    // 1. Ürünü Sepete Ekleme
     function addSaleItem(product) {
-        // TODO: Ürün sepette varsa miktarını artır, yoksa yeni obje olarak diziye ekle.
-        /*
-        let existing = salesCart.find(item => item.id === product.id);
-        if(existing) {
-            existing.qty += 1;
-        } else {
-            salesCart.push({ ...product, qty: 1 });
+        if (product.stok <= 0) {
+            Swal.fire('Stok Yok!', 'Bu ürünün stoğu tükenmiş.', 'warning');
+            return;
         }
-        */
+
+        let existing = salesCart.find(item => item.id === product.id);
+        if (existing) {
+            if (existing.miktar >= product.stok) {
+                Swal.fire('Stok Yetersiz!', 'Stokta olandan fazla ekleyemezsiniz.', 'warning');
+                return;
+            }
+            existing.miktar += 1;
+        } else {
+            salesCart.push({ id: product.id, ad: product.ad, fiyat: product.fiyat, miktar: 1, stok: product.stok, barkod: product.barkod });
+        }
         
         updateSalesCartUI();
     }
 
     // 2. Sepetten Ürün Çıkarma
     function removeSaleItem(productId) {
-        // TODO: salesCart dizisinden productId'ye sahip öğeyi çıkar.
-        // salesCart = salesCart.filter(item => item.id !== productId);
+        salesCart = salesCart.filter(item => item.id !== productId);
         updateSalesCartUI();
     }
 
     // 3. Sepeti Tamamen Temizleme
     function clearSalesCart() {
-        if(confirm("Sepeti temizlemek istediğinize emin misiniz?")) {
-            salesCart = [];
-            updateSalesCartUI();
+        if (salesCart.length > 0) {
+            Swal.fire({
+                title: 'Sepeti Temizle',
+                text: "Sepetteki tüm ürünleri silmek istediğinize emin misiniz?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Evet, temizle!',
+                cancelButtonText: 'İptal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    salesCart = [];
+                    updateSalesCartUI();
+                }
+            });
         }
     }
 
@@ -309,34 +292,84 @@ $page_title = 'Hızlı Satış Ekranı (POS)';
         let totalCount = document.getElementById('salesTotalItemsCount');
         let grandTotal = document.getElementById('salesGrandTotal');
         
-        // TODO: salesCart dizisindeki elemanları dönerek HTML oluştur ve container içine yazdır.
-        // emptyMsg elementini sepet doluyken gizle ( display: none ), boşken göster ( display: flex ).
-        // Toplam fiyat ve adetleri hesaplayıp ilgili span'lere yazdır.
-        
+        let totalItems = 0;
+        let totalPrice = 0;
+
+        let itemsHTML = '';
+
         if (salesCart.length === 0) {
-            // Boş sepet durumu
-            // container.innerHTML = emptyMsg HTML'ini geri getir vs.
+            emptyMsg.style.display = 'flex';
         } else {
-            // Dolu sepet durumu, döngüyle ürünleri yazdır...
+            emptyMsg.style.display = 'none';
+            
+            salesCart.forEach(item => {
+                let itemTotal = item.fiyat * item.miktar;
+                totalItems += item.miktar;
+                totalPrice += itemTotal;
+
+                itemsHTML += `
+                <div class="d-flex justify-content-between align-items-center bg-dark p-3 rounded mb-2 border border-secondary shadow-sm">
+                    <div>
+                        <div class="text-white fw-bold fs-6">${item.ad}</div>
+                        <small class="text-muted">₺${item.fiyat.toFixed(2)} x ${item.miktar} Adet</small>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <h6 class="text-success mb-0 me-3 fw-bold">₺${itemTotal.toFixed(2)}</h6>
+                        <button class="btn btn-sm btn-danger rounded-circle" onclick="removeSaleItem(${item.id})"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                </div>`;
+            });
         }
+
+        if (salesCart.length > 0) {
+            container.innerHTML = itemsHTML;
+        } else {
+            container.innerHTML = '';
+            container.appendChild(emptyMsg);
+        }
+
+        uniqueCount.innerText = salesCart.length;
+        totalCount.innerText = totalItems;
+        grandTotal.innerText = '₺' + totalPrice.toFixed(2);
     }
 
     // 5. Satışı Tamamlama (Veritabanına Kayıt)
     function completeSale() {
-        if(salesCart.length === 0) {
-            alert("Sepet boş! Ürün ekleyin.");
+        if (salesCart.length === 0) {
+            Swal.fire('Sepet Boş', 'Lütfen satışı tamamlamak için sepete ürün ekleyin.', 'warning');
             return;
         }
         
         let note = document.getElementById('salesNote').value;
         
-        // TODO: AJAX/Fetch ile salesCart dizisini ve notu PHP'ye gönder, veritabanına kaydet.
-        // Veritabanında Satislar ve SatisDetay tablolarına kayıt atılmalı ve stok düşürülmeli.
-        console.log("Satış Tamamlanıyor", { note: note, items: salesCart });
-        
-        alert("Satış başarıyla tamamlandı! (Bu simülasyondur)");
-        // clearSalesCart();
+        fetch("ajax/satis_yap.php", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ items: salesCart, note: note })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.basarili) {
+                Swal.fire({
+                    title: 'Satış Başarılı!',
+                    html: `<b>İşlem Kodu:</b> <span class="text-success fs-5">${data.islem_kodu}</span><br><br>Satış başarıyla kaydedildi ve stoklar düşüldü.`,
+                    icon: 'success',
+                    confirmButtonText: 'Tamam'
+                }).then(() => {
+                    salesCart = [];
+                    document.getElementById('salesNote').value = '';
+                    updateSalesCartUI();
+                    urunAra(); // Stokların güncel halini ekrana yansıt
+                });
+            } else {
+                Swal.fire('Hata!', data.mesaj || 'Satış işlemi başarısız oldu.', 'error');
+            }
+        })
+        .catch(error => {
+            console.error("Satış hatası:", error);
+            Swal.fire('Hata!', 'Sunucu ile iletişim kurulurken bir hata oluştu.', 'error');
+        });
     }
 </script>
-
-// footer is now included in index.php

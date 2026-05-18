@@ -16,6 +16,7 @@ if(!isset($_SESSION['login'])){
         case 'kategoriler': $page_title = 'Kategori Yönetimi'; break;
         case 'personel': $page_title = 'Personel Yönetimi'; break;
         case 'raporlar': $page_title = 'Finans ve Detaylı Raporlar'; break;
+        case 'iade': $page_title = 'Ürün İade ve İptal İşlemleri'; break;
         default: $page_title = 'Sayfa Bulunamadı'; break;
     }
 
@@ -42,6 +43,9 @@ if(!isset($_SESSION['login'])){
             break;
         case 'raporlar':
             include 'raporlar.php';
+            break;
+        case 'iade':
+            include 'iade.php';
             break;
         default:
             include 'dashboard.php';

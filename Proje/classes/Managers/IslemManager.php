@@ -32,32 +32,72 @@ class IslemManager extends TemelManager {
         
     }
 
-    public function satisYap($urunler)
+    // Satış Yapma İşlemi (Sepetteki ürünleri işler, stok düşer ve benzersiz işlem kodu üretir)
+    public function satisYap($urunler, $not = '', $personelId = 1, $musteri = 'Nakit Müşteri')
     {
-        foreach ($urunler as $urun)
-            {   
-                $sql = "
-                INSERT INTO islemler (
-                    islem_kodu,
-                    islem_tipi,
-                    urun_id,
-                    miktar,
-                    personel_id,
-                    birim_fiyat,
-                    toplam_tutar,
-                    musteri_bilgisi
-                ) VALUES ('', 'satış', $urun[id], $urun[miktar], $urun[personel_id], $urun[birim_fiyat], $urun[toplam_tutar], $urun[musteri_bilgisi])
-                ";
+        if (empty($urunler)) return false;
 
-                $this->db->query($sql);
+        // Benzersiz İşlem Kodu Üretimi (Örn: FIS-20260519-4829)
+        $islemKodu = 'FIS-' . date('Ymd') . '-' . rand(1000, 9999);
+        $personelId = (int)$personelId;
+        $not = $this->db->real_escape_string($not);
+        $musteri = $this->db->real_escape_string($musteri);
+
+        $basarili = true;
+
+        foreach ($urunler as $urun) {
+            $urunId = (int)$urun['id'];
+            $miktar = (int)$urun['miktar'];
+            $birimFiyat = (float)$urun['fiyat'];
+            $toplamTutar = $birimFiyat * $miktar;
+
+            // 1. İşlemler tablosuna ekle
+            $sqlIslem = "INSERT INTO islemler (islem_kodu, islem_tipi, urun_id, miktar, personel_id, birim_fiyat, toplam_tutar, musteri_bilgisi, aciklama) 
+                         VALUES ('$islemKodu', 'SATIS', $urunId, $miktar, $personelId, $birimFiyat, $toplamTutar, '$musteri', '$not')";
+            if (!$this->db->query($sqlIslem)) {
+                error_log("Satış ekleme hatası: " . $this->db->error);
+                $basarili = false;
             }
 
+            // 2. Ürün stok miktarını düşür
+            $sqlStok = "UPDATE urunler SET stok_miktari = stok_miktari - $miktar WHERE id = $urunId";
+            $this->db->query($sqlStok);
+        }
 
+        return $basarili ? $islemKodu : false;
     }
 
+    // İade Alma İşlemi
+    public function iadeAl($islemKodu, $urunId, $iadeMiktar, $personelId, $aciklama = 'Müşteri İadesi')
+    {
+        $islemKodu = $this->db->real_escape_string($islemKodu);
+        $urunId = (int)$urunId;
+        $iadeMiktar = (int)$iadeMiktar;
+        $personelId = (int)$personelId;
+        $aciklama = $this->db->real_escape_string($aciklama);
 
-    public function iadeAl(){
+        // Orijinal satışı bul
+        $sorgu = $this->db->query("SELECT birim_fiyat FROM islemler WHERE islem_kodu = '$islemKodu' AND urun_id = $urunId AND islem_tipi = 'SATIS' LIMIT 1");
+        if (!$sorgu || $sorgu->num_rows === 0) {
+            return ['basarili' => false, 'mesaj' => 'Belirtilen işlem koduna ait satış kaydı bulunamadı.'];
+        }
+
+        $satir = $sorgu->fetch_assoc();
+        $birimFiyat = (float)$satir['birim_fiyat'];
+        $iadeTutar = -($birimFiyat * $iadeMiktar); // İade olduğu için eksi tutar
+
+        // İade kaydını islemler tablosuna ekle (IADE koduyla)
+        $iadeKodu = str_replace('FIS-', 'IADE-', $islemKodu) . '-' . rand(100,999);
+        $sqlIslem = "INSERT INTO islemler (islem_kodu, islem_tipi, urun_id, miktar, personel_id, birim_fiyat, toplam_tutar, musteri_bilgisi, aciklama) 
+                     VALUES ('$iadeKodu', 'IADE', $urunId, $iadeMiktar, $personelId, $birimFiyat, $iadeTutar, 'İade Müşterisi', '$aciklama')";
         
+        if ($this->db->query($sqlIslem)) {
+            // Ürün stoğunu geri artır
+            $this->db->query("UPDATE urunler SET stok_miktari = stok_miktari + $iadeMiktar WHERE id = $urunId");
+            return ['basarili' => true, 'mesaj' => 'İade işlemi başarıyla tamamlandı. Stok güncellendi.', 'iade_kodu' => $iadeKodu];
+        }
+
+        return ['basarili' => false, 'mesaj' => 'İade işlemi sırasında veritabanı hatası oluştu.'];
     }
 
     public function degisimYap(){

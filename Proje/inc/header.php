@@ -44,6 +44,9 @@ $current_page = $_GET['sayfa'] ?? 'dashboard';
             <li class="<?= ($current_page == 'satis') ? 'active' : '' ?>">
                 <a href="index.php?sayfa=satis"><i class="fa-solid fa-cart-arrow-down"></i> Hızlı Satış / Değişim</a>
             </li>
+            <li class="<?= ($current_page == 'iade') ? 'active' : '' ?>">
+                <a href="index.php?sayfa=iade"><i class="fa-solid fa-rotate-left"></i> Ürün İade İşlemleri</a>
+            </li>
             <li class="<?= ($current_page == 'urunler') ? 'active' : '' ?>">
                 <a href="index.php?sayfa=urunler"><i class="fa-solid fa-boxes-stacked"></i> Ürün Yönetimi</a>
             </li>
