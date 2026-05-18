@@ -8,13 +8,13 @@ if(!isset($_SESSION['login'])){
     $sayfa = $_GET['sayfa'] ?? 'dashboard';
     $yetki = strtoupper($_SESSION['personel_yetki'] ?? 'PERSONEL');
 
-    // 1. Yetki Kontrol Tablosu (Kasiyer: satis | Personel: satis, alislar | Yonetici: hepsi)
+    // 1. Yetki Kontrol Tablosu (Kasiyer: dashboard, satis | Personel: dashboard, satis, alislar | Yonetici: hepsi)
     $izinli = false;
     if ($yetki === 'YONETICI') {
         $izinli = true;
-    } elseif ($yetki === 'PERSONEL' && in_array($sayfa, ['satis', 'alislar'])) {
+    } elseif ($yetki === 'PERSONEL' && in_array($sayfa, ['dashboard', 'satis', 'alislar'])) {
         $izinli = true;
-    } elseif ($yetki === 'KASIYER' && $sayfa === 'satis') {
+    } elseif ($yetki === 'KASIYER' && in_array($sayfa, ['dashboard', 'satis'])) {
         $izinli = true;
     }
 

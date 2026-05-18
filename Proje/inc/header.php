@@ -39,7 +39,7 @@ $current_page = $_GET['sayfa'] ?? 'dashboard';
         </div>
         <ul class="list-unstyled components">
             <li class="<?= ($current_page == 'dashboard') ? 'active' : '' ?>">
-                <a onclick="checkAuthAndNavigate(event, 'index.php?sayfa=dashboard', 'dashboard', 'YONETICI')"><i class="fa-solid fa-chart-pie"></i> Dashboard</a>
+                <a onclick="checkAuthAndNavigate(event, 'index.php?sayfa=dashboard', 'dashboard', 'KASIYER')"><i class="fa-solid fa-chart-pie"></i> Dashboard</a>
             </li>
             <li class="<?= ($current_page == 'satis') ? 'active' : '' ?>">
                 <a onclick="checkAuthAndNavigate(event, 'index.php?sayfa=satis', 'satis', 'KASIYER')"><i class="fa-solid fa-cart-arrow-down"></i> Hızlı Satış / Değişim</a>
