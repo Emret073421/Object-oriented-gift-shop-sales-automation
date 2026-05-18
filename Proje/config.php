@@ -29,8 +29,8 @@ spl_autoload_register(function ($className) {
 });
 
 // 4. Veritabanı Bağlantısını Başlat
-$dbObj = new Database(); // Makineyi (Class) oluşturduk
-$db = $dbObj->baglan();  // İçindeki fonksiyonu çalıştırıp bağlantıyı $db'ye aldık
+$dbObj = new Veritabani(); // Makineyi (Veritabani Sınıfı) oluşturduk
+$db = $dbObj->conn;        // İçindeki conn nesnesini çalıştırıp bağlantıyı $db'ye aldık
 
 // Artık projenin her yerinde $db değişkenini kullanarak 
 // veritabanı işlemlerini yapabilirsin.
