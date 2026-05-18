@@ -8,7 +8,7 @@ class Database {
     private $conn;
 
     public function baglan() {
-        // 2. Bağlantıyı kurarken 'new mysqli' kullanarak nesne tabanlı başlatıyoruz.
+        // 2. Bağlantıyı kurarken 'new mysqli' kullanarak tam nesne tabanlı (OOP) başlatıyoruz.
         $this->conn = new mysqli($this->host, $this->username, $this->password, $this->dbname);
 
         // 3. Hata Kontrolü: Eğer bağlantı yoksa sistemi durdur ve hatayı söyle.
