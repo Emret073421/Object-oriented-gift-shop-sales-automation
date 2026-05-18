@@ -18,6 +18,7 @@ if (empty($sepet)) {
 $tedarikci = $db->real_escape_string($tedarikci ?: 'Genel Tedarikçi');
 $tarih = $db->real_escape_string($tarih ?: date('Y-m-d H:i:s'));
 $not = $db->real_escape_string($not);
+$personelId = (int)($_SESSION['personel_id'] ?? 1);
 
 // İşlem Kodu Oluşturma: ALIS-YYYYMMDD-RastgeleSayı
 $islemKodu = 'ALIS-' . date('Ymd') . '-' . rand(1000, 9999);
@@ -36,8 +37,8 @@ try {
         }
 
         // 1. islemler tablosuna ALIS kaydı ekle
-        $sqlIslem = "INSERT INTO islemler (islem_kodu, islem_tipi, urun_id, miktar, birim_fiyat, toplam_tutar, musteri_bilgisi, aciklama, islem_tarihi) 
-                     VALUES ('$islemKodu', 'ALIS', $urunId, $miktar, $alisFiyati, $toplamTutar, '$tedarikci', '$not', '$tarih')";
+        $sqlIslem = "INSERT INTO islemler (islem_kodu, islem_tipi, urun_id, miktar, personel_id, birim_fiyat, toplam_tutar, musteri_bilgisi, aciklama, islem_tarihi) 
+                     VALUES ('$islemKodu', 'ALIS', $urunId, $miktar, $personelId, $alisFiyati, $toplamTutar, '$tedarikci', '$not', '$tarih')";
         
         if (!$db->query($sqlIslem)) {
             throw new Exception("İşlem kaydı eklenirken hata oluştu: " . $db->error);
